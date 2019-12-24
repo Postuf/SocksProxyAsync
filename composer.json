@@ -1,0 +1,13 @@
+{
+    "name": "postuf/socks-proxy-async",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "SocksProxyAsync\\": "src/"
+        }
+    },
+    "require": {
+        "ext-sockets": "*",
+        "phpunit/phpunit": "^8.5"
+    }
+}

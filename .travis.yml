@@ -12,7 +12,7 @@ matrix:
 before_install:
 - composer self-update
 - nohup node/proxy.js &
-- cd node/http; nohup start.sh &; cd ../..
+- nohup node/http/start.sh &
 cache:
   directories:
   - "$HOME/.cache/composer"

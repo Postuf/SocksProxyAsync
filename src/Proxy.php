@@ -29,8 +29,12 @@ class Proxy
     {
         if(strstr($serverAndPort, '|')){
             $parts = explode('|', $serverAndPort);
+            if (count($parts) !== 2)
+                throw new SocksException(SocksException::PROXY_BAD_FORMAT);
             $serverAndPort = $parts[0];
             $auth = explode(':', $parts[1]);
+            if (count($auth) !== 2)
+                throw new SocksException(SocksException::PROXY_BAD_FORMAT);
             $this->setLoginPassword($auth[0], $auth[1]);
         }
         $proxyPath = explode(':', $serverAndPort);

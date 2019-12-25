@@ -1,10 +1,6 @@
 os:
 - linux
 language: php
-addons:
-  apt:
-    packages:
-      nohup
 php:
 - 7.2
 - 7.3

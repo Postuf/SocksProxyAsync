@@ -6,30 +6,30 @@ namespace SocksProxyAsync;
  * Class which manages native socket as socks5-connected socket
  * This class works only with SOCKS v5, supports only basic
  * authorization - without login:password
- * */
+ */
 class Socks5Socket
 {
     /**
      * Native socket
      * @var resource
-     * */
+     */
     protected $socksSocket = null;
     /**
      * Domain name, not IP address
      * @var string
-     * */
+     */
     protected $host;
     /**
      * @var int
-     * */
+     */
     protected $port;
     /**
      * @var Proxy
-     * */
+     */
     protected $proxy;
     /**
      * @var int
-     * */
+     */
     protected $timeoutSeconds;
 
 
@@ -47,7 +47,7 @@ class Socks5Socket
     /***
      * Closes active connection
      * @return void
-     * */
+     */
     public function disconnect()
     {
         if (is_resource($this->socksSocket)) {
@@ -62,7 +62,7 @@ class Socks5Socket
      * @param int $port
      * @return resource|boolean
      * @throws SocksException
-     * */
+     */
     public function createConnected($host, $port)
     {
         $this->host = $host;
@@ -224,8 +224,8 @@ class Socks5Socket
 
     /**
      * @param string $data binary to write
-     * @return int bytes actually written
-     * */
+     * @return int|bool bytes actually written/false if could not write
+     */
     public function write($data)
     {
         return @socket_write($this->socksSocket, $data);
@@ -234,8 +234,8 @@ class Socks5Socket
 
     /**
      * @param int $bytesCount bytes count to read
-     * @return string binary
-     * */
+     * @return string|bool binary/false if could not read
+     */
     public function read($bytesCount)
     {
         return @socket_read($this->socksSocket, $bytesCount);

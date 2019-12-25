@@ -51,6 +51,9 @@ class SocketAsyncTest extends TestCase
         $this->socket->stop();
     }
 
+    /**
+     * @throws SocksException
+     */
     public function test_throw_on_incorrect_port() {
         // here we assume port 9999 is not occupied
         $socket = new SocketAsync($this->proxy, self::HOST, 9999);

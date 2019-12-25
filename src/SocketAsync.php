@@ -5,7 +5,7 @@ namespace SocksProxyAsync;
  * Class which manages native socket as socks5-connected socket
  * This class works only with SOCKS v5, supports only basic
  * authorization - without login:password
- * */
+ */
 class SocketAsync extends Socks5Socket implements Async
 {
     /**

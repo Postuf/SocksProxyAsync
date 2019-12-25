@@ -8,35 +8,35 @@ class AsyncStep
 {
     /**
      * @var int
-     * */
+     */
     private $step = 0;
     /**
      * @var int
-     * */
+     */
     private $stepTries = 0;
     /**
      * @var array
-     * */
+     */
     private $stepDurations = [];
     /**
      * @var int
-     * */
+     */
     private $stepStart = 0;
     /**
      * @var string
-     * */
+     */
     private $stepName;
     /**
      * @var int
-     * */
+     */
     private $criticalTimeSeconds;
     /**
      * @var boolean
-     * */
+     */
     private $finished = false;
     /**
      * @var boolean
-     * */
+     */
     private $neverRun = true;
 
 

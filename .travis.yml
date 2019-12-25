@@ -19,6 +19,6 @@ cache:
   - "$HOME/.composer/cache"
 install:
 - travis_retry composer install --no-interaction --prefer-source
-script: "./tools/phpunit"
+script: "./vendor/bin/phpunit tests"
 notifications:
   email: false

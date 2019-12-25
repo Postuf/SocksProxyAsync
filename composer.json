@@ -1,6 +1,8 @@
 {
     "name": "postuf/socks-proxy-async",
     "type": "library",
+    "description": "Lightweight asynchronous socks proxy for PHP",
+    "homepage": "https://github.com/Postuf/SocksProxyAsync",
     "autoload": {
         "psr-4": {
             "SocksProxyAsync\\": "src/"

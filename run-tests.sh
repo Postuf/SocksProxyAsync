@@ -14,6 +14,9 @@ cd node/http
 nohup ./start.sh &
 cd $DIR
 sleep 5
+echo proxy output:
 tail nohup.out
+echo http srv output:
+tail node/http/nohup.out
 
 ./vendor/bin/phpunit tests && kill -9 `cat pid1.txt` && kill -9 `cat pid2.txt` && rm -f pid1.txt pid2.txt

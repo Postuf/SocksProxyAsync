@@ -3,7 +3,7 @@ var socks = require('socksv5');
 var srv = socks.createServer(function(info, accept, deny) {
   accept();
 });
-let port = 1080;
+var port = 1080;
 if (process.argv.length > 2) {
   port = parseInt(process.argv[2])
 }

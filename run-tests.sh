@@ -7,6 +7,7 @@ cd ..
 
 rm -f nohup.out node/http/nohup.out
 
+node --version
 nohup node node/proxy.js &
 echo $! > pid1.txt
 cd node/http

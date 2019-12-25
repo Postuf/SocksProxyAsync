@@ -4,3 +4,5 @@ vendor
 *.swp
 .phpunit.result.cache
 nohup.out
+pid1.txt
+pid2.txt

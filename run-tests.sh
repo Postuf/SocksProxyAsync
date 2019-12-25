@@ -7,6 +7,13 @@ cd ..
 
 rm -f nohup.out node/http/nohup.out
 
+if [ -f pid1.txt ]; then
+  kill -9 `cat pid1.txt`
+fi
+if [ -f pid2.txt ]; then
+  kill -9 `cat pid2.txt`
+fi
+
 node --version
 nohup node node/proxy.js &
 echo $! > pid1.txt
@@ -19,4 +26,5 @@ tail nohup.out
 echo http srv output:
 tail node/http/nohup.out
 
+echo "starting test..."
 ./vendor/bin/phpunit tests && kill -9 `cat pid1.txt` && kill -9 `cat pid2.txt` && rm -f pid1.txt pid2.txt

@@ -1,0 +1,28 @@
+os:
+- linux
+language: php
+addons:
+  apt:
+    packages:
+      nohup
+php:
+- 7.2
+- 7.3
+- 7.4
+- master
+matrix:
+  allow_failures:
+  - php: master
+before_install:
+- composer self-update
+- nohup node/proxy.js &
+- cd node/http; nohup start.sh &
+cache:
+  directories:
+  - "$HOME/.cache/composer"
+  - "$HOME/.composer/cache"
+install:
+- travis_retry composer install --no-interaction --prefer-source
+script: "./tools/phpunit"
+notifications:
+  email: false

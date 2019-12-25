@@ -3,6 +3,7 @@
     "type": "library",
     "description": "Lightweight asynchronous socks proxy for PHP",
     "homepage": "https://github.com/Postuf/SocksProxyAsync",
+    "license": "MIT",
     "autoload": {
         "psr-4": {
             "SocksProxyAsync\\": "src/"

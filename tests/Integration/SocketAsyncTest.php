@@ -45,6 +45,12 @@ class SocketAsyncTest extends TestCase
         usleep(2000000);
         $response = $this->socket->read(4096);
         $lines = explode("\n", trim($response));
+        foreach ($lines as $k => $line) {
+            if (trim($line === 'Connection: close')) {
+                unset($lines[$k]);
+            }
+        }
+        $lines = array_values($lines);
         $lastLine = $lines[count($lines) - 1];
         /** @see node/http/test */
         $this->assertEquals('test', $lastLine);

@@ -7,18 +7,20 @@ php:
 - 7.4
 - master
 matrix:
+  include:
+    - language: node_js
+  node_js:
+    - 7
   allow_failures:
   - php: master
 before_install:
 - composer self-update
-- nohup node/proxy.js &
-- nohup node/http/start.sh &
 cache:
   directories:
   - "$HOME/.cache/composer"
   - "$HOME/.composer/cache"
 install:
 - travis_retry composer install --no-interaction --prefer-source
-script: "./vendor/bin/phpunit tests"
+script: "./run-tests.sh"
 notifications:
   email: false

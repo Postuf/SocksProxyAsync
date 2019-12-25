@@ -16,8 +16,4 @@ cd $DIR
 sleep 5
 tail nohup.out
 
-./vendor/bin/phpunit tests
-
-kill -9 `cat pid1.txt`
-kill -9 `cat pid2.txt`
-rm -f pid1.txt pid2.txt
+./vendor/bin/phpunit tests && kill -9 `cat pid1.txt` && kill -9 `cat pid2.txt` && rm -f pid1.txt pid2.txt

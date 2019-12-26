@@ -5,17 +5,19 @@ namespace SocksProxyAsync;
 /**
  * Class which manages native socket as socks5-connected socket
  * This class works only with SOCKS v5, supports only basic
- * authorization - without login:password
+ * authorization - without login:password.
  */
 class Socks5Socket
 {
     /**
-     * Native socket
+     * Native socket.
+     *
      * @var resource
      */
     protected $socksSocket = null;
     /**
-     * Domain name, not IP address
+     * Domain name, not IP address.
+     *
      * @var string
      */
     protected $host;
@@ -32,17 +34,15 @@ class Socks5Socket
      */
     protected $timeoutSeconds;
 
-
     /**
      * @param Proxy $proxy
-     * @param int $timeOutSeconds
+     * @param int   $timeOutSeconds
      */
     public function __construct(Proxy $proxy, int $timeOutSeconds)
     {
         $this->proxy = $proxy;
         $this->timeoutSeconds = $timeOutSeconds;
     }
-
 
     /***
      * Closes active connection
@@ -59,9 +59,11 @@ class Socks5Socket
 
     /**
      * @param string $host containing domain name
-     * @param int $port
-     * @return resource|boolean
+     * @param int    $port
+     *
      * @throws SocksException
+     *
+     * @return resource|bool
      */
     public function createConnected($host, $port)
     {
@@ -73,7 +75,7 @@ class Socks5Socket
         $this->writeSocksGreeting();
         $socksGreetingConfig = $this->readSocksGreeting();
         $this->checkServerGreetedClient($socksGreetingConfig);
-        if($this->checkGreetngWithAuth($socksGreetingConfig)){
+        if ($this->checkGreetngWithAuth($socksGreetingConfig)) {
             $this->writeSocksAuth();
             $this->readSocksAuthStatus();
         }
@@ -87,12 +89,12 @@ class Socks5Socket
     {
         $this->socksSocket = @socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         socket_set_option($this->socksSocket, SOL_SOCKET, SO_RCVTIMEO, [
-            'sec' => Constants::SOCKET_CONNECT_TIMEOUT_SEC,
-            'usec' => 0
+            'sec'  => Constants::SOCKET_CONNECT_TIMEOUT_SEC,
+            'usec' => 0,
         ]);
         socket_set_option($this->socksSocket, SOL_SOCKET, SO_SNDTIMEO, [
-            'sec' => Constants::SOCKET_CONNECT_TIMEOUT_SEC,
-            'usec' => 0
+            'sec'  => Constants::SOCKET_CONNECT_TIMEOUT_SEC,
+            'usec' => 0,
         ]);
     }
 
@@ -100,8 +102,9 @@ class Socks5Socket
     {
         if ($this->socksSocket !== false) {
             $result = @socket_connect($this->socksSocket, $this->proxy->getServer(), $this->proxy->getPort());
-            if (!$result)
+            if (!$result) {
                 throw new SocksException(SocksException::UNREACHABLE_PROXY, 'on connect: ');
+            }
         }
 
         return false;
@@ -116,35 +119,40 @@ class Socks5Socket
     protected function readSocksGreeting() : string
     {
         $socksGreetingConfig = $this->read(2);
-        if (!$socksGreetingConfig)
-            return FALSE;
+        if (!$socksGreetingConfig) {
+            return false;
+        }
+
         return $socksGreetingConfig;
     }
 
     /**
      * @param string $socksGreetingConfig
+     *
      * @throws SocksException
      */
     protected function checkServerGreetedClient($socksGreetingConfig)
     {
-        if(!$socksGreetingConfig)
+        if (!$socksGreetingConfig) {
             throw new SocksException(SocksException::CONNECTION_NOT_ESTABLISHED);
-
+        }
         $socksVersion = ord($socksGreetingConfig[0]);
         $socksAuthType = ord($socksGreetingConfig[1]);
 
-        if($socksVersion != 0x05)
+        if ($socksVersion != 0x05) {
             throw new SocksException(SocksException::UNEXPECTED_PROTOCOL_VERSION, $socksVersion);
-        if($socksAuthType != 0x00 && $socksAuthType != 0x02)
+        }
+        if ($socksAuthType != 0x00 && $socksAuthType != 0x02) {
             throw new SocksException(SocksException::UNSUPPORTED_AUTH_TYPE, $socksAuthType);
+        }
     }
 
     protected function checkGreetngWithAuth(string $socksGreetingConfig)
     {
         $socksAuthType = ord($socksGreetingConfig[1]);
+
         return $socksAuthType == 0x02;
     }
-
 
     protected function writeSocksAuth()
     {
@@ -157,7 +165,6 @@ class Socks5Socket
         $this->write("\x01".$ulength.$userName.$plength.$password);
     }
 
-
     /**
      * @throws SocksException
      */
@@ -165,19 +172,21 @@ class Socks5Socket
     {
         $socksAuthStatus = $this->read(2);
 
-        if(!$socksAuthStatus)
-            return FALSE;
+        if (!$socksAuthStatus) {
+            return false;
+        }
 
-        if($socksAuthStatus[0] != "\x01" || $socksAuthStatus[1] != "\x00")
+        if ($socksAuthStatus[0] != "\x01" || $socksAuthStatus[1] != "\x00") {
             throw new SocksException(SocksException::AUTH_FAILED);
+        }
 
-        return TRUE;
+        return true;
     }
-
 
     /**
      * SOCKS protocol: https://ru.wikipedia.org/wiki/SOCKS
-     * Client`s second request and server`s second response
+     * Client`s second request and server`s second response.
+     *
      * @throws SocksException
      */
     protected function connectSocksSocket()
@@ -185,7 +194,7 @@ class Socks5Socket
         $host = $this->host;
         $port = $this->port;
         $hostnameLenBinary = chr(strlen($host));
-        $portBinary = unpack("C*", pack("L", $port));
+        $portBinary = unpack('C*', pack('L', $port));
         $portBinary = chr($portBinary[2]).chr($portBinary[1]);
 
         // client connection request
@@ -193,21 +202,22 @@ class Socks5Socket
         $this->write($establishmentMsg);
     }
 
-
     protected function readSocksConnectStatus()
     {
         // server connection response
         $connectionStatus = $this->read(1024);
-        if(!$connectionStatus)
-            return FALSE;
+        if (!$connectionStatus) {
+            return false;
+        }
 
         $this->checkConnectionEstablished($connectionStatus);
-        return TRUE;
-    }
 
+        return true;
+    }
 
     /**
      * @param string $serverConnectionResponse
+     *
      * @throws SocksException
      */
     protected function checkConnectionEstablished($serverConnectionResponse)
@@ -215,15 +225,17 @@ class Socks5Socket
         $socksVersion = ord($serverConnectionResponse[0]);
         $responseCode = ord($serverConnectionResponse[1]);
 
-        if($socksVersion != 0x05)
+        if ($socksVersion != 0x05) {
             throw new SocksException(SocksException::UNEXPECTED_PROTOCOL_VERSION, $socksVersion);
-        if($responseCode != 0x00)
+        }
+        if ($responseCode != 0x00) {
             throw new SocksException(SocksException::CONNECTION_NOT_ESTABLISHED, $responseCode);
+        }
     }
-
 
     /**
      * @param string $data binary to write
+     *
      * @return int|bool bytes actually written/false if could not write
      */
     public function write($data)
@@ -231,9 +243,9 @@ class Socks5Socket
         return @socket_write($this->socksSocket, $data);
     }
 
-
     /**
      * @param int $bytesCount bytes count to read
+     *
      * @return string|bool binary/false if could not read
      */
     public function read($bytesCount)

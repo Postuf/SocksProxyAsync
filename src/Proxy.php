@@ -11,41 +11,43 @@ class Proxy
     private $port;
     private $type;
 
-    private $password = NULL;
-    private $login = NULL;
-
+    private $password = null;
+    private $login = null;
 
     /**
      * Proxy constructor.
      * Proxy formats:
      *      1) host:port
-     *      2) host:port|login:password
+     *      2) host:port|login:password.
      *
      * @param string $serverAndPort
-     * @param int $type
+     * @param int    $type
+     *
      * @throws SocksException
      */
-    public function __construct(string $serverAndPort, $type=Proxy::TYPE_SOCKS5)
+    public function __construct(string $serverAndPort, $type = self::TYPE_SOCKS5)
     {
-        if(strstr($serverAndPort, '|')){
+        if (strstr($serverAndPort, '|')) {
             $parts = explode('|', $serverAndPort);
-            if (count($parts) !== 2)
+            if (count($parts) !== 2) {
                 throw new SocksException(SocksException::PROXY_BAD_FORMAT);
+            }
             $serverAndPort = $parts[0];
             $auth = explode(':', $parts[1]);
-            if (count($auth) !== 2)
+            if (count($auth) !== 2) {
                 throw new SocksException(SocksException::PROXY_BAD_FORMAT);
+            }
             $this->setLoginPassword($auth[0], $auth[1]);
         }
         $proxyPath = explode(':', $serverAndPort);
-        if(sizeof($proxyPath) != 2)
+        if (count($proxyPath) != 2) {
             throw new SocksException(SocksException::PROXY_BAD_FORMAT);
+        }
         $this->server = trim($proxyPath[0]);
         $this->port = trim($proxyPath[1]);
 
-        $this->type = (int)$type;
+        $this->type = (int) $type;
     }
-
 
     public function setLoginPassword($login, $password)
     {
@@ -53,47 +55,38 @@ class Proxy
         $this->password = $password;
     }
 
-
     public function getServer()
     {
         return $this->server;
     }
-
 
     public function getPort()
     {
         return $this->port;
     }
 
-
     public function getType()
     {
         return $this->type;
     }
-
 
     public function isNeedAuth()
     {
         return $this->login && $this->password;
     }
 
-
     public function getLogin()
     {
         return $this->login;
     }
-
 
     public function getPassword()
     {
         return $this->password;
     }
 
-
-    function __toString()
+    public function __toString()
     {
         return $this->server.':'.$this->port;
     }
-
-
 }

@@ -31,14 +31,13 @@ class AsyncStep
      */
     private $criticalTimeSeconds;
     /**
-     * @var boolean
+     * @var bool
      */
     private $finished = false;
     /**
-     * @var boolean
+     * @var bool
      */
     private $neverRun = true;
-
 
     public function __construct(string $stepName, float $criticalTimeSeconds = Constants::ASYNC_STEP_MAX_SEC)
     {
@@ -79,10 +78,10 @@ class AsyncStep
 
     public function checkIfStepStuck()
     {
-        if($this->finished)
+        if ($this->finished) {
             throw new Exception(Constants::ERR_SOCKET_ASYNC_STEP_FINISHED);
-
-        if($this->neverRun){
+        }
+        if ($this->neverRun) {
             $this->neverRun = false;
             $this->resetStep();
         }
@@ -90,15 +89,14 @@ class AsyncStep
         $this->stepTries++;
         $this->stepDurations[] = microtime(true) - $this->stepStart;
 
-        if((microtime(true) - $this->stepStart) > $this->criticalTimeSeconds){
+        if ((microtime(true) - $this->stepStart) > $this->criticalTimeSeconds) {
             throw new Exception(
                 Constants::ERR_SOCKET_ASYNC_STEP_TOO_LONG,
                 'Step stucked: '.$this->stepName.
-                ", stepNo: ".$this->step .
-                ', tries: ' . $this->stepTries .
-                ', durations: ' . print_r($this->stepDurations, true)
+                ', stepNo: '.$this->step.
+                ', tries: '.$this->stepTries.
+                ', durations: '.print_r($this->stepDurations, true)
             );
         }
     }
-
 }

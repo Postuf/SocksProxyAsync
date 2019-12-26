@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace SocksProxyAsync;
 
 use Exception;
@@ -17,12 +19,12 @@ class SocksException extends Exception
     public function __construct(int $code, string $metaErrorInfo = '')
     {
         $message = $this->createMessageByCode($code);
-        if($metaErrorInfo)
+        if ($metaErrorInfo) {
             $message .= "($metaErrorInfo)";
+        }
 
         parent::__construct($message, $code, null);
     }
-
 
     private function createMessageByCode(int $code): string
     {
@@ -43,5 +45,4 @@ class SocksException extends Exception
                 return 'Code: '.$code;
         }
     }
-
 }

@@ -29,10 +29,11 @@ class SocketAsyncTest extends TestCase
     /** @test
      * @throws SocksException
      */
-    public function test_socket_works() {
+    public function test_socket_works()
+    {
         $this->assertEquals(self::HOST, $this->socket->getHost());
 
-        while(!$this->socket->ready()) {
+        while (!$this->socket->ready()) {
             $this->socket->poll();
         }
 
@@ -52,7 +53,7 @@ class SocketAsyncTest extends TestCase
         }
         $lines = array_values($lines);
         $lastLine = $lines[count($lines) - 1];
-        /** @see node/http/test */
+        /* @see node/http/test */
         $this->assertEquals('test', $lastLine);
         $this->socket->stop();
     }
@@ -60,11 +61,12 @@ class SocketAsyncTest extends TestCase
     /**
      * @throws SocksException
      */
-    public function test_throw_on_incorrect_port() {
+    public function test_throw_on_incorrect_port()
+    {
         // here we assume port 9999 is not occupied
         $socket = new SocketAsync($this->proxy, self::HOST, 9999);
         $this->expectException('SocksProxyAsync\SocksException');
-        while(!$this->socket->ready()) {
+        while (!$this->socket->ready()) {
             $socket->poll();
         }
     }

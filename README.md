@@ -19,8 +19,9 @@ while(true) {
   // process events
   if (!$socket->ready()) {
     $socket->poll();
+  } else {
+    // your logic ...
   }
-  // your logic ...
 }
 ```
 

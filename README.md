@@ -2,7 +2,7 @@
 
 Asynchronous SOCKS5 client library
 
-[![Build Status](https://travis-ci.org/Postuf/SocksProxyAsync.svg?branch=master)](https://travis-ci.org/Postuf/SocksProxyAsync)
+[![Build Status](https://travis-ci.org/Postuf/SocksProxyAsync.svg?branch=master)](https://travis-ci.org/Postuf/SocksProxyAsync) [![codecov](https://codecov.io/gh/Postuf/SocksProxyAsync/branch/master/graph/badge.svg)](https://codecov.io/gh/Postuf/SocksProxyAsync)
 
 ## Requirements
 

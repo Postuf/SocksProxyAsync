@@ -91,7 +91,7 @@ class AsyncStep
 
         if ((microtime(true) - $this->stepStart) > $this->criticalTimeSeconds) {
             throw new Exception(
-                Constants::ERR_SOCKET_ASYNC_STEP_TOO_LONG,
+                Constants::ERR_SOCKET_ASYNC_STEP_TOO_LONG . ' ' .
                 'Step stucked: '.$this->stepName.
                 ', stepNo: '.$this->step.
                 ', tries: '.$this->stepTries.

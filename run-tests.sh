@@ -27,4 +27,4 @@ echo http srv output:
 tail node/http/nohup.out
 
 echo "starting test..."
-./vendor/bin/phpunit tests && kill -9 `cat pid1.txt` && kill -9 `cat pid2.txt` && rm -f pid1.txt pid2.txt
+./vendor/bin/phpunit --configuration tests/phpunit.config.xml tests && kill -9 `cat pid1.txt` && kill -9 `cat pid2.txt` && rm -f pid1.txt pid2.txt

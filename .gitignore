@@ -6,3 +6,4 @@ vendor
 nohup.out
 pid1.txt
 pid2.txt
+tests/coverage.xml

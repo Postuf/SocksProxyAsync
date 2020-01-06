@@ -102,10 +102,20 @@ class SocketAsync extends Socks5Socket implements Async
     }
 
     /**
+     * Override this function to add more steps
+     * @return bool true if step processed
+     */
+    protected function afterSteps(): bool
+    {
+        return false;
+    }
+
+    /**
+     * @return bool true if should not check step stuck
      * @throws SocksException
      * @throws dnsException
      */
-    public function poll(): void
+    protected function baseSteps(): bool
     {
         switch ($this->step->getStep()) {
             case self::STATE_INITIAL:
@@ -168,9 +178,24 @@ class SocketAsync extends Socks5Socket implements Async
                     $this->step->finish();
                     $this->isReady = true;
 
-                    return;
+                    return true;
                 }
                 break;
+        }
+
+        return false;
+    }
+
+    /**
+     * @throws SocksException
+     * @throws dnsException
+     */
+    public function poll(): void
+    {
+        if (!$this->afterSteps()) {
+            if ($this->baseSteps()) {
+                return;
+            }
         }
 
         try {

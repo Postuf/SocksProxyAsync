@@ -82,11 +82,20 @@ class AsyncStep
         $this->stepDurations = [];
     }
 
+    protected function isStable(int $step): bool
+    {
+        return $step === -1;
+    }
+
     /**
      * @throws Exception
      */
     public function checkIfStepStuck(): void
     {
+        if ($this->isStable($this->step)) {
+            return;
+        }
+
         if ($this->finished) {
             throw new Exception(Constants::ERR_SOCKET_ASYNC_STEP_FINISHED);
         }

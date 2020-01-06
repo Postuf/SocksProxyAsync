@@ -9,6 +9,7 @@ use PHPUnit\Framework\TestCase;
 use SocksProxyAsync\Constants;
 use SocksProxyAsync\Proxy;
 use SocksProxyAsync\SocketAsync;
+use SocksProxyAsync\SocketAsyncCallback;
 use SocksProxyAsync\SocksException;
 
 class SocketAsyncTest extends TestCase
@@ -102,7 +103,8 @@ class SocketAsyncTest extends TestCase
         $this->assertEquals(self::HOST, $socket->getHost());
     }
 
-    /** @test
+    /**
+     * @test
      * @throws SocksException
      * @throws dnsException
      */
@@ -133,6 +135,50 @@ class SocketAsyncTest extends TestCase
         /* @see node/http/test */
         $this->assertEquals('test', $lastLine);
         $this->socket->stop();
+    }
+
+    /**
+     * @test
+     * @throws SocksException
+     * @throws dnsException
+     * @noinspection PhpUnusedParameterInspection
+     */
+    public function test_socket_cb_works(): void
+    {
+        $ready = false;
+        $socket = new SocketAsyncCallback(
+            $this->proxy,
+            self::HOST,
+            self::PORT,
+            function (SocketAsyncCallback $socketAsyncCallback) use(&$ready) {
+                $ready = true;
+            }
+        );
+        $this->assertEquals(self::HOST, $socket->getHost());
+
+        while (!$ready) {
+            $socket->poll();
+        }
+
+        // http req body
+        $br = "\r\n";
+        $data = "GET /test{$br}Host: 127.0.0.1:8080{$br}Accept: identity{$br}{$br}";
+
+        $writtenBytes = $socket->write($data);
+        $this->assertEquals($writtenBytes, strlen($data));
+        usleep(2000000);
+        $response = $socket->read(4096);
+        $lines = explode("\n", trim($response));
+        foreach ($lines as $k => $line) {
+            if ($line && trim($line) === 'Connection: close') {
+                unset($lines[$k]);
+            }
+        }
+        $lines = array_values($lines);
+        $lastLine = $lines[count($lines) - 1];
+        /* @see node/http/test */
+        $this->assertEquals('test', $lastLine);
+        $socket->stop();
     }
 
     /**

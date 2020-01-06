@@ -14,9 +14,10 @@ use SocksProxyAsync\SocksException;
 class SocketAsyncTest extends TestCase
 {
     /** @see node subdir */
-    const HOST = '127.0.0.1';
-    const PORT = '8080';
-    const PROXY = '127.0.0.1:1080';
+    private const HOST = '127.0.0.1';
+    private const PORT = '8080';
+    private const PROXY = '127.0.0.1:1080';
+    private const DEFAULT_DNS_FOR_TEST = '127.0.0.1:9999';
 
     /** @var SocketAsync */
     private $socket;
@@ -35,6 +36,32 @@ class SocketAsyncTest extends TestCase
      */
     public function test_async_socket_ip(): void
     {
+        $proxy = new Proxy('127.0.0.1:1080');
+        $socket = new SocketAsync(
+            $proxy,
+            self::HOST,
+            self::PORT,
+            Constants::DEFAULT_TIMEOUT,
+            true,
+            self::DEFAULT_DNS_FOR_TEST
+        );
+        $this->assertEquals(self::HOST, $this->socket->getHost());
+
+        while (!$socket->ready()) {
+            /** @noinspection PhpUnhandledExceptionInspection */
+            $socket->poll();
+        }
+
+        $this->assertEquals('127.0.0.1', $proxy->getServer());
+        $this->assertEquals(self::HOST, $socket->getHost());
+    }
+
+
+    /**
+     * @test
+     */
+    public function test_async_socket_name(): void
+    {
         $proxy = new Proxy('localhost:1080');
         $socket = new SocketAsync(
             $proxy,
@@ -42,7 +69,7 @@ class SocketAsyncTest extends TestCase
             self::PORT,
             Constants::DEFAULT_TIMEOUT,
             true,
-            '127.0.0.1:9999'
+            self::DEFAULT_DNS_FOR_TEST
         );
         $this->assertEquals(self::HOST, $this->socket->getHost());
 

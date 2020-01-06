@@ -61,8 +61,9 @@ class Socks5Socket
      * @param string $host containing domain name
      * @param int    $port
      *
-     * @return resource|bool
      * @throws SocksException
+     *
+     * @return resource|bool
      * @noinspection PhpUnused
      */
     public function createConnected($host, $port)
@@ -100,8 +101,9 @@ class Socks5Socket
     }
 
     /**
-     * @return bool
      * @throws SocksException
+     *
+     * @return bool
      */
     protected function connectSocket(): bool
     {
@@ -208,8 +210,9 @@ class Socks5Socket
     }
 
     /**
-     * @return bool
      * @throws SocksException
+     *
+     * @return bool
      */
     protected function readSocksConnectStatus(): bool
     {

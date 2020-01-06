@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SocksProxyAsync;
@@ -45,11 +46,11 @@ class SocketAsync extends Socks5Socket implements Async
     protected $nameReady = false;
 
     /**
-     * @param Proxy $proxy
+     * @param Proxy  $proxy
      * @param string $host
-     * @param int $port
-     * @param int $timeOutSeconds
-     * @param bool $asyncDns
+     * @param int    $port
+     * @param int    $timeOutSeconds
+     * @param bool   $asyncDns
      * @param string $dnsHostAndPort
      */
     public function __construct(

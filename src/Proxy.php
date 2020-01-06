@@ -81,6 +81,7 @@ class Proxy
     public function setServer(string $server): self
     {
         $this->server = $server;
+
         return $this;
     }
 

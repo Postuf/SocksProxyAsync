@@ -1,6 +1,13 @@
 <?php
+declare(strict_types=1);
 
 namespace SocksProxyAsync;
+
+use Exception;
+use Metaregistrar\DNS\dnsAresult;
+use Metaregistrar\DNS\dnsException;
+use Metaregistrar\DNS\dnsProtocol;
+use Metaregistrar\DNS\dnsResponse;
 
 /**
  * Class which manages native socket as socks5-connected socket
@@ -9,6 +16,15 @@ namespace SocksProxyAsync;
  */
 class SocketAsync extends Socks5Socket implements Async
 {
+    public const STATE_INITIAL = 0;
+    public const STATE_RESOLVE = 5;
+    public const STATE_CONNECT = 10;
+    public const STATE_GREETING = 20;
+    public const STATE_AUTH = 30;
+    public const STATE_SOCKET_CONNECT = 40;
+    public const STATE_READ_STATUS = 50;
+    public const DEFAULT_DNS_SERVER = '8.8.8.8';
+
     /**
      * @var AsyncStep
      */
@@ -17,59 +33,113 @@ class SocketAsync extends Socks5Socket implements Async
     /** @var bool */
     protected $isReady;
 
+    /** @var bool */
+    protected $asyncDns = false;
+
+    /** @var dnsProtocol */
+    protected $resolver;
+
+    /** @var bool */
+    protected $cbSet = false;
+    /** @var bool */
+    protected $nameReady = false;
+
     /**
-     * @param Proxy  $proxy
+     * @param Proxy $proxy
      * @param string $host
-     * @param int    $port
-     * @param int    $timeOutSeconds
+     * @param int $port
+     * @param int $timeOutSeconds
+     * @param bool $asyncDns
+     * @param string $dnsHostAndPort
      */
-    public function __construct(Proxy $proxy, $host, $port, int $timeOutSeconds = Constants::DEFAULT_TIMEOUT)
-    {
+    public function __construct(
+        Proxy $proxy,
+        $host,
+        $port,
+        int $timeOutSeconds = Constants::DEFAULT_TIMEOUT,
+        bool $asyncDns = false,
+        string $dnsHostAndPort = self::DEFAULT_DNS_SERVER
+    ) {
         parent::__construct($proxy, $timeOutSeconds);
         $this->host = $host;
         $this->port = $port;
         $this->step = new AsyncStep('Socks5SocketAsync_poll', Constants::SOCKET_CONNECT_TIMEOUT_SEC);
         $this->isReady = false;
+        $this->asyncDns = $asyncDns;
+        if ($asyncDns) {
+            $dnsPort = dnsProtocol::DEFAULT_PORT;
+            $dnsHost = $dnsHostAndPort;
+            if (strpos($dnsHost, ':') !== false) {
+                [$host, $dnsPort] = explode(':', $dnsHost);
+            }
+            $this->resolver = new dnsProtocol(false, (int) $dnsPort, true);
+            $this->resolver->setServer($host);
+        }
     }
 
     /**
      * @throws SocksException
+     * @throws dnsException
      */
     public function poll(): void
     {
         switch ($this->step->getStep()) {
-            case 0:
+            case self::STATE_INITIAL:
                 $this->createSocket();
-                $this->step->setStep(1);
+                $this->step->setStep($this->asyncDns ? self::STATE_RESOLVE : self::STATE_CONNECT);
                 break;
-            case 1:
-                if ($this->connectSocket()) {
-                    $this->writeSocksGreeting();
-                    $this->step->setStep(2);
+            case self::STATE_RESOLVE:
+                if (preg_match('/\d+\.\d+\.\d+\.\d+/', $this->proxy->getServer())) {
+                    $this->step->setStep(self::STATE_CONNECT);
+                } else {
+                    if (!$this->cbSet) {
+                        $this->resolver->QueryAsync($this->proxy->getServer(), 'A', function (?dnsResponse $result, ?string $error = null) {
+                            if (!$error) {
+                                foreach ($result->getResourceResults() as $resource) {
+                                    if ($resource instanceof dnsAresult) {
+                                        //echo $resource->getDomain() . ' - ' . $resource->getIpv4() . ' - ' . $resource->getTtl() . "\n";
+                                        $this->proxy->setServer($resource->getIpv4());
+                                    }
+                                }
+                            }
+                            $this->nameReady = true;
+                        });
+                        $this->cbSet = true;
+                    }
+
+                    if (!$this->nameReady) {
+                        $this->resolver->poll();
+                    }
                 }
                 break;
-            case 2:
+            case self::STATE_CONNECT:
+                if ($this->connectSocket()) {
+                    $this->writeSocksGreeting();
+                    $this->step->setStep(self::STATE_GREETING);
+                }
+                break;
+            case self::STATE_GREETING:
                 $socksGreetingConfig = $this->readSocksGreeting();
                 if ($socksGreetingConfig) {
                     $this->checkServerGreetedClient($socksGreetingConfig);
                     if ($this->checkGreetngWithAuth($socksGreetingConfig)) {
                         $this->writeSocksAuth();
-                        $this->step->setStep(3);
+                        $this->step->setStep(self::STATE_AUTH);
                     } else {
-                        $this->step->setStep(4);
+                        $this->step->setStep(self::STATE_SOCKET_CONNECT);
                     }
                 }
                 break;
-            case 3:
+            case self::STATE_AUTH:
                 if ($this->readSocksAuthStatus()) {
-                    $this->step->setStep(4);
+                    $this->step->setStep(self::STATE_SOCKET_CONNECT);
                 }
                 break;
-            case 4:
+            case self::STATE_SOCKET_CONNECT:
                 $this->connectSocksSocket();
-                $this->step->setStep(5);
+                $this->step->setStep(self::STATE_READ_STATUS);
                 break;
-            case 5:
+            case self::STATE_READ_STATUS:
                 if ($this->readSocksConnectStatus()) {
                     $this->step->finish();
                     $this->isReady = true;
@@ -81,10 +151,10 @@ class SocketAsync extends Socks5Socket implements Async
 
         try {
             $this->step->checkIfStepStuck();
-        } catch (SocksException $e) {
+        } catch (Exception $e) {
             $this->stop();
 
-            throw $e;
+            throw new SocksException(SocksException::STEP_STUCK);
         }
     }
 
@@ -93,18 +163,16 @@ class SocketAsync extends Socks5Socket implements Async
         return $this->isReady;
     }
 
-    protected function createSocket()
+    protected function createSocket(): void
     {
         $this->socksSocket = @socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         socket_set_nonblock($this->socksSocket);
-        socket_set_option($this->socksSocket, SOL_SOCKET, SO_RCVTIMEO, [
+        $timeoutParams = [
             'sec'  => Constants::SOCKET_CONNECT_TIMEOUT_SEC,
             'usec' => 0,
-        ]);
-        socket_set_option($this->socksSocket, SOL_SOCKET, SO_SNDTIMEO, [
-            'sec'  => Constants::SOCKET_CONNECT_TIMEOUT_SEC,
-            'usec' => 0,
-        ]);
+        ];
+        socket_set_option($this->socksSocket, SOL_SOCKET, SO_RCVTIMEO, $timeoutParams);
+        socket_set_option($this->socksSocket, SOL_SOCKET, SO_SNDTIMEO, $timeoutParams);
         socket_clear_error($this->socksSocket);
     }
 
@@ -113,10 +181,10 @@ class SocketAsync extends Socks5Socket implements Async
      *
      * @return bool
      */
-    protected function connectSocket()
+    protected function connectSocket(): bool
     {
         if ($this->socksSocket !== false) {
-            @socket_connect($this->socksSocket, $this->proxy->getServer(), $this->proxy->getPort());
+            @socket_connect($this->socksSocket, $this->proxy->getServer(), (int) $this->proxy->getPort());
             $lastError = socket_last_error($this->socksSocket);
             if ($lastError == SOCKET_EINPROGRESS || $lastError == SOCKET_EALREADY) {
                 return false;

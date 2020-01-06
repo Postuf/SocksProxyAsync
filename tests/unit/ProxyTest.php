@@ -21,6 +21,14 @@ class ProxyTest extends TestCase
     }
 
     /** @test */
+    public function it_sets_server(): void
+    {
+        $proxy = new Proxy('1.2.3.4:80');
+        $proxy->setServer('1.2.3.5');
+        $this->assertEquals('1.2.3.5', $proxy->getServer());
+    }
+
+    /** @test */
     public function it_creates_with_login_pw(): void
     {
         $proxy = new Proxy('1.2.3.4:80|a:b');

@@ -20,6 +20,6 @@
     },
     "require": {
         "ext-sockets": "*",
-        "metaregistrar/php-dns-client": "dev-master"
+        "metaregistrar/php-dns-client": "dev-async"
     }
 }

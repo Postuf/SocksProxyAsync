@@ -1,0 +1,3 @@
+[submodule "node/named"]
+	path = node/named
+	url = git@github.com:wkejqb/node-named.git

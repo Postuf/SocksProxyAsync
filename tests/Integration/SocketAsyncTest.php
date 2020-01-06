@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Integration;
 
+use Metaregistrar\DNS\dnsException;
 use PHPUnit\Framework\TestCase;
+use SocksProxyAsync\Constants;
 use SocksProxyAsync\Proxy;
 use SocksProxyAsync\SocketAsync;
 use SocksProxyAsync\SocksException;
@@ -28,8 +30,34 @@ class SocketAsyncTest extends TestCase
         parent::setUp();
     }
 
+    /**
+     * @test
+     */
+    public function test_async_socket_ip(): void
+    {
+        $proxy = new Proxy('localhost:1080');
+        $socket = new SocketAsync(
+            $proxy,
+            self::HOST,
+            self::PORT,
+            Constants::DEFAULT_TIMEOUT,
+            true,
+            '127.0.0.1:9999'
+        );
+        $this->assertEquals(self::HOST, $this->socket->getHost());
+
+        while (!$socket->ready()) {
+            /** @noinspection PhpUnhandledExceptionInspection */
+            $socket->poll();
+        }
+
+        $this->assertEquals('127.0.0.1', $proxy->getServer());
+        $this->assertEquals(self::HOST, $socket->getHost());
+    }
+
     /** @test
      * @throws SocksException
+     * @throws dnsException
      */
     public function test_socket_works(): void
     {
@@ -62,6 +90,7 @@ class SocketAsyncTest extends TestCase
 
     /**
      * @throws SocksException
+     * @throws dnsException
      */
     public function test_throw_on_incorrect_port(): void
     {
@@ -69,6 +98,7 @@ class SocketAsyncTest extends TestCase
         $socket = new SocketAsync($this->proxy, self::HOST, 9999);
         $this->expectException(SocksException::class);
         while (!$this->socket->ready()) {
+            /** @noinspection PhpUnhandledExceptionInspection */
             $socket->poll();
         }
     }

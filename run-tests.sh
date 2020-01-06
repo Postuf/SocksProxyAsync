@@ -1,8 +1,14 @@
 #!/bin/bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-cd node
+git submodule update --init
+
+cd node/named
 npm install
+# we are in node
+cd ..
+npm install
+# we are in root dir
 cd ..
 
 rm -f nohup.out node/http/nohup.out

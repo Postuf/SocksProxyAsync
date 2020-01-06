@@ -48,7 +48,7 @@ class Socks5Socket
      * Closes active connection
      * @return void
      */
-    public function disconnect()
+    public function disconnect(): void
     {
         if (is_resource($this->socksSocket)) {
             @socket_shutdown($this->socksSocket, 2);
@@ -61,9 +61,9 @@ class Socks5Socket
      * @param string $host containing domain name
      * @param int    $port
      *
-     * @throws SocksException
-     *
      * @return resource|bool
+     * @throws SocksException
+     * @noinspection PhpUnused
      */
     public function createConnected($host, $port)
     {
@@ -85,7 +85,8 @@ class Socks5Socket
         return $this->socksSocket;
     }
 
-    protected function createSocket()
+    /** @noinspection SpellCheckingInspection */
+    protected function createSocket(): void
     {
         $this->socksSocket = @socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         socket_set_option($this->socksSocket, SOL_SOCKET, SO_RCVTIMEO, [
@@ -98,7 +99,11 @@ class Socks5Socket
         ]);
     }
 
-    protected function connectSocket()
+    /**
+     * @return bool
+     * @throws SocksException
+     */
+    protected function connectSocket(): bool
     {
         if ($this->socksSocket !== false) {
             $result = @socket_connect($this->socksSocket, $this->proxy->getServer(), $this->proxy->getPort());
@@ -154,15 +159,15 @@ class Socks5Socket
         return $socksAuthType == 0x02;
     }
 
-    protected function writeSocksAuth()
+    protected function writeSocksAuth(): void
     {
         $userName = $this->proxy->getLogin();
-        $ulength = chr(strlen($userName));
+        $userLength = chr(strlen($userName));
 
         $password = $this->proxy->getPassword();
-        $plength = chr(strlen($password));
+        $passwordLength = chr(strlen($password));
 
-        $this->write("\x01".$ulength.$userName.$plength.$password);
+        $this->write("\x01".$userLength.$userName.$passwordLength.$password);
     }
 
     /**
@@ -187,9 +192,9 @@ class Socks5Socket
      * SOCKS protocol: https://ru.wikipedia.org/wiki/SOCKS
      * Client`s second request and server`s second response.
      *
-     * @throws SocksException
+     * @see https://tools.ietf.org/html/rfc1928
      */
-    protected function connectSocksSocket()
+    protected function connectSocksSocket(): void
     {
         $host = $this->host;
         $port = $this->port;
@@ -202,7 +207,11 @@ class Socks5Socket
         $this->write($establishmentMsg);
     }
 
-    protected function readSocksConnectStatus()
+    /**
+     * @return bool
+     * @throws SocksException
+     */
+    protected function readSocksConnectStatus(): bool
     {
         // server connection response
         $connectionStatus = $this->read(1024);

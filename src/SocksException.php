@@ -15,6 +15,7 @@ class SocksException extends Exception
     public const AUTH_FAILED = 5000;
     public const RESPONSE_WAS_NOT_RECEIVED = 6000;
     public const PROXY_BAD_FORMAT = 7000;
+    public const STEP_STUCK = 8000;
 
     public function __construct(int $code, string $metaErrorInfo = '')
     {
@@ -41,6 +42,8 @@ class SocksException extends Exception
                 return 'Authorization via login/password failed';
             case self::RESPONSE_WAS_NOT_RECEIVED:
                 return 'Proxy not responded on last message';
+            case self::STEP_STUCK:
+                return 'Some step stuck';
             default:
                 return 'Code: '.$code;
         }

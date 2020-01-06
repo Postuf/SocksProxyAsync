@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a90cd6fc900318c6b2a0e4b21b6834ec",
+    "content-hash": "1ebc39db6201265983637ec49e906b72",
     "packages": [
         {
             "name": "metaregistrar/php-dns-client",
-            "version": "dev-master",
+            "version": "dev-async",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wkejqb/php-dns-client.git",
-                "reference": "c0250296c76125464f498f91d22049fc52bf488f"
+                "reference": "39a5985b64ea9bd32368615417feadb8b229879c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wkejqb/php-dns-client/zipball/c0250296c76125464f498f91d22049fc52bf488f",
-                "reference": "c0250296c76125464f498f91d22049fc52bf488f",
+                "url": "https://api.github.com/repos/wkejqb/php-dns-client/zipball/39a5985b64ea9bd32368615417feadb8b229879c",
+                "reference": "39a5985b64ea9bd32368615417feadb8b229879c",
                 "shasum": ""
             },
             "require-dev": {
@@ -40,9 +40,9 @@
             ],
             "description": "A php-only, object-oriented client that is able to read and process DNS records",
             "support": {
-                "source": "https://github.com/wkejqb/php-dns-client/tree/master"
+                "source": "https://github.com/wkejqb/php-dns-client/tree/async"
             },
-            "time": "2019-04-26T07:38:34+00:00"
+            "time": "2020-01-06T08:36:39+00:00"
         }
     ],
     "packages-dev": [

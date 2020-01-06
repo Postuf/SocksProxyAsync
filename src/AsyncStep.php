@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace SocksProxyAsync;
 
@@ -46,7 +47,7 @@ class AsyncStep
         $this->neverRun = true;
     }
 
-    public function setStep(int $stepIdentity)
+    public function setStep(int $stepIdentity): void
     {
         $this->step = $stepIdentity;
         $this->resetStep();
@@ -57,14 +58,18 @@ class AsyncStep
         return $this->step;
     }
 
-    public function finish()
+    public function finish(): void
     {
         $this->step = -1;
         $this->finished = true;
         $this->resetStep();
     }
 
-    public function finished()
+    /**
+     * @return bool
+     * @noinspection PhpUnused
+     */
+    public function finished(): bool
     {
         return $this->finished;
     }
@@ -76,7 +81,10 @@ class AsyncStep
         $this->stepDurations = [];
     }
 
-    public function checkIfStepStuck()
+    /**
+     * @throws Exception
+     */
+    public function checkIfStepStuck(): void
     {
         if ($this->finished) {
             throw new Exception(Constants::ERR_SOCKET_ASYNC_STEP_FINISHED);

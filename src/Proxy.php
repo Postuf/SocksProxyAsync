@@ -78,6 +78,12 @@ class Proxy
         return $this->server;
     }
 
+    public function setServer(string $server): self
+    {
+        $this->server = $server;
+        return $this;
+    }
+
     public function getPort(): string
     {
         return $this->port;

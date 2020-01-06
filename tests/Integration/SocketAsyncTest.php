@@ -59,6 +59,30 @@ class SocketAsyncTest extends TestCase
     /**
      * @test
      */
+    public function test_async_socket_ip_with_default_dns(): void
+    {
+        $proxy = new Proxy('127.0.0.1:1080');
+        $socket = new SocketAsync(
+            $proxy,
+            self::HOST,
+            self::PORT,
+            Constants::DEFAULT_TIMEOUT,
+            true
+        );
+        $this->assertEquals(self::HOST, $this->socket->getHost());
+
+        while (!$socket->ready()) {
+            /** @noinspection PhpUnhandledExceptionInspection */
+            $socket->poll();
+        }
+
+        $this->assertEquals('127.0.0.1', $proxy->getServer());
+        $this->assertEquals(self::HOST, $socket->getHost());
+    }
+
+    /**
+     * @test
+     */
     public function test_async_socket_name(): void
     {
         $proxy = new Proxy('localhost:1080');

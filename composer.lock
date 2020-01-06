@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/wkejqb/php-dns-client.git",
-                "reference": "39a5985b64ea9bd32368615417feadb8b229879c"
+                "reference": "30d59dc0be876809ce46c6f52943bc0fffa98af1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wkejqb/php-dns-client/zipball/39a5985b64ea9bd32368615417feadb8b229879c",
-                "reference": "39a5985b64ea9bd32368615417feadb8b229879c",
+                "url": "https://api.github.com/repos/wkejqb/php-dns-client/zipball/30d59dc0be876809ce46c6f52943bc0fffa98af1",
+                "reference": "30d59dc0be876809ce46c6f52943bc0fffa98af1",
                 "shasum": ""
             },
             "require-dev": {
@@ -42,7 +42,7 @@
             "support": {
                 "source": "https://github.com/wkejqb/php-dns-client/tree/async"
             },
-            "time": "2020-01-06T08:36:39+00:00"
+            "time": "2020-01-06T12:43:04+00:00"
         }
     ],
     "packages-dev": [

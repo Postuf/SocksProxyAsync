@@ -19,8 +19,13 @@ fi
 if [ -f pid2.txt ]; then
   kill -9 `cat pid2.txt`
 fi
+if [ -f pid3.txt ]; then
+  kill -9 `cat pid3.txt`
+fi
 
 node --version
+nohup node node/named.js &
+echo $! > pid3.txt
 nohup node node/proxy.js &
 echo $! > pid1.txt
 cd node/http
@@ -33,4 +38,4 @@ echo http srv output:
 tail node/http/nohup.out
 
 echo "starting test..."
-./vendor/bin/phpunit --configuration tests/phpunit.config.xml tests && kill -9 `cat pid1.txt` && kill -9 `cat pid2.txt` && rm -f pid1.txt pid2.txt
+./vendor/bin/phpunit --configuration tests/phpunit.config.xml tests && kill -9 `cat pid1.txt` && kill -9 `cat pid2.txt` && kill -9 `cat pid3.txt` && rm -f pid1.txt pid2.txt pid3.txt

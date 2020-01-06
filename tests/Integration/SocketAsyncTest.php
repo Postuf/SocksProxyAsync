@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Integration;
 
@@ -29,7 +30,7 @@ class SocketAsyncTest extends TestCase
     /** @test
      * @throws SocksException
      */
-    public function test_socket_works()
+    public function test_socket_works(): void
     {
         $this->assertEquals(self::HOST, $this->socket->getHost());
 
@@ -61,11 +62,11 @@ class SocketAsyncTest extends TestCase
     /**
      * @throws SocksException
      */
-    public function test_throw_on_incorrect_port()
+    public function test_throw_on_incorrect_port(): void
     {
         // here we assume port 9999 is not occupied
         $socket = new SocketAsync($this->proxy, self::HOST, 9999);
-        $this->expectException('SocksProxyAsync\SocksException');
+        $this->expectException(SocksException::class);
         while (!$this->socket->ready()) {
             $socket->poll();
         }

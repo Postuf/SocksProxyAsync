@@ -1,8 +1,8 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SocksProxyAsync;
-
 
 class SocketAsyncCallback extends SocketAsync
 {
@@ -16,11 +16,12 @@ class SocketAsyncCallback extends SocketAsync
 
     /**
      * SocketAsyncCallback constructor.
-     * @param Proxy $proxy
-     * @param string $host
-     * @param int $port
-     * @param callable $cb function(SocketAsyncCallback $socket)
-     * @param int $timeOutSeconds
+     *
+     * @param Proxy       $proxy
+     * @param string      $host
+     * @param int         $port
+     * @param callable    $cb             function(SocketAsyncCallback $socket)
+     * @param int         $timeOutSeconds
      * @param string|null $dnsHostAndPort
      */
     public function __construct(
@@ -33,12 +34,12 @@ class SocketAsyncCallback extends SocketAsync
     ) {
         parent::__construct($proxy, $host, $port, $timeOutSeconds, $dnsHostAndPort);
         $this->callback = $cb;
-
     }
 
     /**
-     * @return bool
      * @throws SocksException
+     *
+     * @return bool
      */
     protected function afterSteps(): bool
     {
@@ -50,6 +51,7 @@ class SocketAsyncCallback extends SocketAsync
 
                     $this->step->setStep(self::STATE_READY);
                 }
+
                 return true;
             case self::STATE_READY:
                 if (!$this->called) {
@@ -57,6 +59,7 @@ class SocketAsyncCallback extends SocketAsync
                     $cb = $this->callback;
                     $cb($this);
                 }
+
                 return true;
         }
 

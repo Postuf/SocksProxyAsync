@@ -105,6 +105,7 @@ class SocketAsyncTest extends TestCase
 
     /**
      * @test
+     *
      * @throws SocksException
      * @throws dnsException
      */
@@ -139,6 +140,7 @@ class SocketAsyncTest extends TestCase
 
     /**
      * @test
+     *
      * @throws SocksException
      * @throws dnsException
      * @noinspection PhpUnusedParameterInspection
@@ -150,7 +152,7 @@ class SocketAsyncTest extends TestCase
             $this->proxy,
             self::HOST,
             self::PORT,
-            function (SocketAsyncCallback $socketAsyncCallback) use(&$ready) {
+            function (SocketAsyncCallback $socketAsyncCallback) use (&$ready) {
                 $ready = true;
             }
         );

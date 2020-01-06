@@ -102,7 +102,8 @@ class SocketAsync extends Socks5Socket implements Async
     }
 
     /**
-     * Override this function to add more steps
+     * Override this function to add more steps.
+     *
      * @return bool true if step processed
      */
     protected function afterSteps(): bool
@@ -111,9 +112,10 @@ class SocketAsync extends Socks5Socket implements Async
     }
 
     /**
-     * @return bool true if should not check step stuck
      * @throws SocksException
      * @throws dnsException
+     *
+     * @return bool true if should not check step stuck
      */
     protected function baseSteps(): bool
     {

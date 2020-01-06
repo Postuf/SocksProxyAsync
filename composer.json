@@ -9,8 +9,17 @@
             "SocksProxyAsync\\": "src/"
         }
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/wkejqb/php-dns-client"
+        }
+    ],
+    "require-dev": {
+        "phpunit/phpunit": "^8.5"
+    },
     "require": {
         "ext-sockets": "*",
-        "phpunit/phpunit": "^8.5"
+        "metaregistrar/php-dns-client": "dev-master"
     }
 }

@@ -42,7 +42,6 @@ class SocketAsyncTest extends TestCase
             self::HOST,
             self::PORT,
             Constants::DEFAULT_TIMEOUT,
-            true,
             self::DEFAULT_DNS_FOR_TEST
         );
         $this->assertEquals(self::HOST, $this->socket->getHost());
@@ -91,7 +90,6 @@ class SocketAsyncTest extends TestCase
             self::HOST,
             self::PORT,
             Constants::DEFAULT_TIMEOUT,
-            true,
             self::DEFAULT_DNS_FOR_TEST
         );
         $this->assertEquals(self::HOST, $this->socket->getHost());

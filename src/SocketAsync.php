@@ -37,9 +37,6 @@ class SocketAsync extends Socks5Socket implements Async
     /** @var bool */
     protected $isReady;
 
-    /** @var bool */
-    protected $asyncDns = false;
-
     /** @var dnsProtocol */
     protected $resolver;
 
@@ -53,7 +50,6 @@ class SocketAsync extends Socks5Socket implements Async
      * @param string $host
      * @param int    $port
      * @param int    $timeOutSeconds
-     * @param bool   $asyncDns
      * @param string $dnsHostAndPort
      */
     public function __construct(
@@ -61,7 +57,6 @@ class SocketAsync extends Socks5Socket implements Async
         $host,
         $port,
         int $timeOutSeconds = Constants::DEFAULT_TIMEOUT,
-        bool $asyncDns = false,
         ?string $dnsHostAndPort = null
     ) {
         parent::__construct($proxy, $timeOutSeconds);
@@ -69,20 +64,17 @@ class SocketAsync extends Socks5Socket implements Async
         $this->port = $port;
         $this->step = new AsyncStep('Socks5SocketAsync_poll', Constants::SOCKET_CONNECT_TIMEOUT_SEC);
         $this->isReady = false;
-        $this->asyncDns = $asyncDns;
-        if ($asyncDns) {
-            if (!$dnsHostAndPort) {
-                $dnsHostAndPort = $this->getSystemDnsHost() ?: self::DEFAULT_DNS_SERVER;
-            }
-
-            $dnsPort = dnsProtocol::DEFAULT_PORT;
-            $dnsHost = $dnsHostAndPort;
-            if (strpos($dnsHost, ':') !== false) {
-                [$dnsHost, $dnsPort] = explode(':', $dnsHostAndPort);
-            }
-            $this->resolver = new dnsProtocol(false, (int) $dnsPort, true);
-            $this->resolver->setServer($dnsHost);
+        if (!$dnsHostAndPort) {
+            $dnsHostAndPort = $this->getSystemDnsHost() ?: self::DEFAULT_DNS_SERVER;
         }
+
+        $dnsPort = dnsProtocol::DEFAULT_PORT;
+        $dnsHost = $dnsHostAndPort;
+        if (strpos($dnsHost, ':') !== false) {
+            [$dnsHost, $dnsPort] = explode(':', $dnsHostAndPort);
+        }
+        $this->resolver = new dnsProtocol(false, (int) $dnsPort, true);
+        $this->resolver->setServer($dnsHost);
     }
 
     private function getSystemDnsHost(): ?string
@@ -118,7 +110,7 @@ class SocketAsync extends Socks5Socket implements Async
         switch ($this->step->getStep()) {
             case self::STATE_INITIAL:
                 $this->createSocket();
-                $this->step->setStep($this->asyncDns ? self::STATE_RESOLVE : self::STATE_CONNECT);
+                $this->step->setStep(self::STATE_RESOLVE);
                 break;
             case self::STATE_RESOLVE:
                 if (preg_match('/\d+\.\d+\.\d+\.\d+/', $this->proxy->getServer())) {

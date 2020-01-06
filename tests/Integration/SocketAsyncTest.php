@@ -49,7 +49,7 @@ class SocketAsyncTest extends TestCase
         $response = $this->socket->read(4096);
         $lines = explode("\n", trim($response));
         foreach ($lines as $k => $line) {
-            if (trim($line === 'Connection: close')) {
+            if ($line && trim($line) === 'Connection: close') {
                 unset($lines[$k]);
             }
         }

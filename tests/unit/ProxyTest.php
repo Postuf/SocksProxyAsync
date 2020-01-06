@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace unit;
@@ -12,7 +13,7 @@ class ProxyTest extends TestCase
     /** @test */
     public function it_creates(): void
     {
-        $proxy = new Proxy("1.2.3.4:80");
+        $proxy = new Proxy('1.2.3.4:80');
         $this->assertEquals(80, $proxy->getPort());
         $this->assertEquals('1.2.3.4', $proxy->getServer());
         $this->assertEquals(null, $proxy->getLogin());
@@ -22,7 +23,7 @@ class ProxyTest extends TestCase
     /** @test */
     public function it_creates_with_login_pw(): void
     {
-        $proxy = new Proxy("1.2.3.4:80|a:b");
+        $proxy = new Proxy('1.2.3.4:80|a:b');
         $this->assertEquals(80, $proxy->getPort());
         $this->assertEquals('1.2.3.4', $proxy->getServer());
         $this->assertEquals('a', $proxy->getLogin());
@@ -36,7 +37,7 @@ class ProxyTest extends TestCase
     public function it_throws_incorrect_type(): void
     {
         $this->expectException(SocksException::class);
-        new Proxy("1.2.3.4:80", 10);
+        new Proxy('1.2.3.4:80', 10);
     }
 
     /** @test
@@ -45,7 +46,7 @@ class ProxyTest extends TestCase
     public function it_throws_incorrect_pipe(): void
     {
         $this->expectException(SocksException::class);
-        new Proxy("a|b|c");
+        new Proxy('a|b|c');
     }
 
     /** @test
@@ -54,6 +55,6 @@ class ProxyTest extends TestCase
     public function it_throws_incorrect_format(): void
     {
         $this->expectException(SocksException::class);
-        new Proxy("a:b:c");
+        new Proxy('a:b:c');
     }
 }

@@ -116,7 +116,7 @@ class Socks5Socket
         $this->write($helloMsg);
     }
 
-    protected function readSocksGreeting() : string
+    protected function readSocksGreeting(): string
     {
         $socksGreetingConfig = $this->read(2);
         if (!$socksGreetingConfig) {
@@ -168,7 +168,7 @@ class Socks5Socket
     /**
      * @throws SocksException
      */
-    protected function readSocksAuthStatus() : string
+    protected function readSocksAuthStatus(): string
     {
         $socksAuthStatus = $this->read(2);
 

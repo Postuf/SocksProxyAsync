@@ -52,7 +52,7 @@ class AsyncStep
         $this->resetStep();
     }
 
-    public function getStep() : int
+    public function getStep(): int
     {
         return $this->step;
     }

@@ -4,8 +4,8 @@ namespace SocksProxyAsync;
 
 class Proxy
 {
-    const TYPE_HTTP = 1;
-    const TYPE_SOCKS5 = 3;
+    public const TYPE_HTTP = 1;
+    public const TYPE_SOCKS5 = 3;
 
     private $server;
     private $port;
@@ -25,7 +25,7 @@ class Proxy
      *
      * @throws SocksException
      */
-    public function __construct(string $serverAndPort, $type = self::TYPE_SOCKS5)
+    public function __construct(string $serverAndPort, int $type = self::TYPE_SOCKS5)
     {
         if (strstr($serverAndPort, '|')) {
             $parts = explode('|', $serverAndPort);
@@ -46,6 +46,9 @@ class Proxy
         $this->server = trim($proxyPath[0]);
         $this->port = trim($proxyPath[1]);
 
+        if ($type != self::TYPE_HTTP && $type != self::TYPE_SOCKS5) {
+            throw new SocksException(SocksException::PROXY_BAD_FORMAT);
+        }
         $this->type = (int) $type;
     }
 

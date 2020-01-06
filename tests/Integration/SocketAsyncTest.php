@@ -56,7 +56,6 @@ class SocketAsyncTest extends TestCase
         $this->assertEquals(self::HOST, $socket->getHost());
     }
 
-
     /**
      * @test
      */

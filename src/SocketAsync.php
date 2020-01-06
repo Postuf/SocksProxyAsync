@@ -71,10 +71,10 @@ class SocketAsync extends Socks5Socket implements Async
             $dnsPort = dnsProtocol::DEFAULT_PORT;
             $dnsHost = $dnsHostAndPort;
             if (strpos($dnsHost, ':') !== false) {
-                [$host, $dnsPort] = explode(':', $dnsHost);
+                [$dnsHost, $dnsPort] = explode(':', $dnsHostAndPort);
             }
             $this->resolver = new dnsProtocol(false, (int) $dnsPort, true);
-            $this->resolver->setServer($host);
+            $this->resolver->setServer($dnsHost);
         }
     }
 

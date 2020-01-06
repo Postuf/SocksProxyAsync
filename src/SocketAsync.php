@@ -1,4 +1,6 @@
-<?php /** @noinspection SpellCheckingInspection */
+<?php
+
+/** @noinspection SpellCheckingInspection */
 
 declare(strict_types=1);
 
@@ -99,6 +101,7 @@ class SocketAsync extends Socks5Socket implements Async
             }
             if (strpos($line, 'nameserver ') !== false) {
                 $line = str_replace('nameserver ', '', $line);
+
                 return trim($line);
             }
         }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SocksProxyAsync;
@@ -24,7 +25,7 @@ class Proxy
      * Proxy constructor.
      * Proxy formats:
      *      1) host:port
-     *      2) host:port|login:password
+     *      2) host:port|login:password.
      *
      * @param string $serverAndPort
      * @param int    $type
@@ -61,6 +62,7 @@ class Proxy
     /**
      * @param string|null $login
      * @param string|null $password
+     *
      * @return self
      */
     public function setLoginPassword(?string $login, ?string $password): self

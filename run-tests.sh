@@ -1,7 +1,7 @@
 #!/bin/bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-git submodule update --init
+GIT_SSH_COMMAND="ssh -i $DIR/keys/id_rsa" git submodule update --init
 
 cd node/named
 npm install

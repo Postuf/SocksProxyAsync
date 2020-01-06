@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection SpellCheckingInspection */
 
 declare(strict_types=1);
 
@@ -25,6 +25,7 @@ class SocketAsync extends Socks5Socket implements Async
     public const STATE_SOCKET_CONNECT = 40;
     public const STATE_READ_STATUS = 50;
     public const DEFAULT_DNS_SERVER = '8.8.8.8';
+    private const ETC_RESOLV_CONF = '/etc/resolv.conf';
 
     /**
      * @var AsyncStep
@@ -59,7 +60,7 @@ class SocketAsync extends Socks5Socket implements Async
         $port,
         int $timeOutSeconds = Constants::DEFAULT_TIMEOUT,
         bool $asyncDns = false,
-        string $dnsHostAndPort = self::DEFAULT_DNS_SERVER
+        ?string $dnsHostAndPort = null
     ) {
         parent::__construct($proxy, $timeOutSeconds);
         $this->host = $host;
@@ -68,6 +69,10 @@ class SocketAsync extends Socks5Socket implements Async
         $this->isReady = false;
         $this->asyncDns = $asyncDns;
         if ($asyncDns) {
+            if (!$dnsHostAndPort) {
+                $dnsHostAndPort = $this->getSystemDnsHost() ?: self::DEFAULT_DNS_SERVER;
+            }
+
             $dnsPort = dnsProtocol::DEFAULT_PORT;
             $dnsHost = $dnsHostAndPort;
             if (strpos($dnsHost, ':') !== false) {
@@ -76,6 +81,29 @@ class SocketAsync extends Socks5Socket implements Async
             $this->resolver = new dnsProtocol(false, (int) $dnsPort, true);
             $this->resolver->setServer($dnsHost);
         }
+    }
+
+    private function getSystemDnsHost(): ?string
+    {
+        if (!file_exists(self::ETC_RESOLV_CONF)) {
+            return null;
+        }
+
+        $contents = file_get_contents(self::ETC_RESOLV_CONF);
+        $lines = explode("\n", $contents);
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if (strpos($line, '#') !== false) {
+                $line = substr($line, 0, strpos($line, '#'));
+                $line = trim($line);
+            }
+            if (strpos($line, 'nameserver ') !== false) {
+                $line = str_replace('nameserver ', '', $line);
+                return trim($line);
+            }
+        }
+
+        return null;
     }
 
     /**

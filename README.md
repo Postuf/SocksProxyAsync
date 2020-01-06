@@ -10,6 +10,13 @@ Asynchronous SOCKS5 client library
 * Composer
   * ext-sockets
 
+## Quick start
+
+First of all, add library to your app user `composer`:
+```
+composer require postuf/socks-proxy-async
+```
+
 ## How it works
 
 Say, you have a socket and an event loop:
@@ -32,3 +39,5 @@ Internal logic is organized as state machine. You can extend it and add more ste
 
 Tests require working proxy and http server to be up and running, use `node/proxy.js` to start proxy, `node/http/start.sh` (`./start.sh` within its subdir) to start http server.
 By default, http server runs on port 8080, proxy occupies port 1080, tests use these ports.
+
+DNS-related tests require dns server (`node/named.js`) to be up and running.

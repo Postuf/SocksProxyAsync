@@ -65,8 +65,7 @@ class SocketAsyncTest extends TestCase
             $proxy,
             self::HOST,
             self::PORT,
-            Constants::DEFAULT_TIMEOUT,
-            true
+            Constants::DEFAULT_TIMEOUT
         );
         $this->assertEquals(self::HOST, $this->socket->getHost());
 

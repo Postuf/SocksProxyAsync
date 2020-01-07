@@ -1,11 +1,11 @@
 <?php
+
 namespace SocksProxyAsync\DNS;
 
 class dnsMXresult extends dnsResult
 {
     private $prio;
     private $server;
-
 
     public function setPrio($prio)
     {

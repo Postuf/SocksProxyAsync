@@ -1,4 +1,5 @@
 <?php
+
 namespace SocksProxyAsync\DNS;
 
 class dnsSOAresult extends dnsResult
@@ -10,7 +11,6 @@ class dnsSOAresult extends dnsResult
     private $expiry;
     private $retry;
     private $minttl;
-
 
     public function setSerial($serial)
     {
@@ -64,8 +64,8 @@ class dnsSOAresult extends dnsResult
 
     public function setResponsible($name)
     {
-        $dot=strpos($name,".");
-        $name[$dot]="@";
+        $dot = strpos($name, '.');
+        $name[$dot] = '@';
         $this->responsible = $name;
     }
 
@@ -79,9 +79,8 @@ class dnsSOAresult extends dnsResult
         $this->nameserver = $data;
     }
 
-     public function getNameserver()
-     {
-         return $this->nameserver;
-     }
+    public function getNameserver()
+    {
+        return $this->nameserver;
+    }
 }
-

@@ -1,11 +1,12 @@
 <?php
+
 namespace SocksProxyAsync\DNS;
 
 class dnsPTRresult extends dnsResult
 {
     private $data;
 
-    function __construct($data)
+    public function __construct($data)
     {
         parent::__construct();
         $this->setData($data);

@@ -1,4 +1,5 @@
 <?php
+
 namespace SocksProxyAsync\DNS;
 
 class dnsDNSKEYresult extends dnsResult

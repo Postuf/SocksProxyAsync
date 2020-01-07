@@ -1,4 +1,6 @@
-<?php /** @noinspection SpellCheckingInspection */
+<?php
+
+/** @noinspection SpellCheckingInspection */
 
 namespace SocksProxyAsync\DNS;
 
@@ -22,6 +24,7 @@ class dnsRRSIGresult extends dnsResult
 
     /**
      * dnsRRSIGresult constructor.
+     *
      * @param $type
      * @param $algorithm
      * @param $labels
@@ -29,6 +32,7 @@ class dnsRRSIGresult extends dnsResult
      * @param $expiration
      * @param $inception
      * @param $keytag
+     *
      * @throws dnsException
      */
     public function __construct($type, $algorithm, $labels, $originalttl, $expiration, $inception, $keytag)
@@ -42,8 +46,8 @@ class dnsRRSIGresult extends dnsResult
         $this->setOriginalTTL($originalttl);
         $this->setExpirationTimestamp($expiration);
         $this->setInceptionTimestamp($inception);
-        $this->setExpirationDate(date(self::DATE_FORMAT,$expiration));
-        $this->setInceptionDate(date(self::DATE_FORMAT,$inception));
+        $this->setExpirationDate(date(self::DATE_FORMAT, $expiration));
+        $this->setInceptionDate(date(self::DATE_FORMAT, $inception));
         $this->setKeytag($keytag);
     }
 

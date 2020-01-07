@@ -1,5 +1,7 @@
 <?php
+
 namespace SocksProxyAsync\DNS;
+
 class dnsNSresult extends dnsResult
 {
     /** @var string */
@@ -7,6 +9,7 @@ class dnsNSresult extends dnsResult
 
     /**
      * dnsNSresult constructor.
+     *
      * @param string $ns
      */
     public function __construct($ns)

@@ -1,4 +1,5 @@
 <?php
+
 namespace SocksProxyAsync\DNS;
 
 class dnsAresult extends dnsResult
@@ -8,9 +9,10 @@ class dnsAresult extends dnsResult
 
     /**
      * dnsAresult constructor.
+     *
      * @param string $ip
      */
-    function __construct($ip)
+    public function __construct($ip)
     {
         parent::__construct();
         $this->setIpv4($ip);

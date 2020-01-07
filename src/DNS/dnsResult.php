@@ -1,9 +1,9 @@
 <?php
+
 namespace SocksProxyAsync\DNS;
 
 class dnsResult
 {
-
     private $type;
     private $typeId;
     private $class;
@@ -12,8 +12,7 @@ class dnsResult
     private $domain;
     private $string;
     private $record;
-    private $extras = array();
-
+    private $extras = [];
 
     public function __construct()
     {
@@ -60,7 +59,6 @@ class dnsResult
         $this->ttl = $ttl;
     }
 
-
     public function getData()
     {
         return $this->data;
@@ -81,7 +79,6 @@ class dnsResult
         $this->domain = $domain;
     }
 
-
     public function getString()
     {
         return $this->string;
@@ -91,7 +88,6 @@ class dnsResult
     {
         $this->string = $string;
     }
-
 
     public function getRecord()
     {

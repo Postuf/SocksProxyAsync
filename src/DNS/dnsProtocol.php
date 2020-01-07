@@ -1,4 +1,6 @@
-<?php /** @noinspection SpellCheckingInspection */
+<?php
+
+/** @noinspection SpellCheckingInspection */
 
 namespace SocksProxyAsync\DNS;
 
@@ -22,38 +24,31 @@ class dnsProtocol
     /** @var string|null */
     private $returnSize;
     /**
-     *
-     * @var boolean $logging
+     * @var bool
      */
     protected $logging;
     /**
-     *
-     * @var array $logEntries
+     * @var array
      */
     protected $logEntries;
     /**
-     *
-     * @var string $server
+     * @var string
      */
     protected $server;
     /**
-     *
-     * @var int $port default 53
+     * @var int default 53
      */
     protected $port;
     /**
-     *
-     * @var float $timeout = 60
+     * @var float = 60
      */
     protected $timeout;
     /**
-     *
-     * @var boolean $udp = false;
+     * @var bool = false;
      */
     protected $udp;
     /**
-     *
-     * @var array $types
+     * @var array
      */
     protected $types;
 
@@ -82,47 +77,48 @@ class dnsProtocol
 
     /**
      * dnsProtocol constructor.
+     *
      * @param bool $logging
-     * @param int $port
+     * @param int  $port
      * @param bool $udp
      */
-    function __construct($logging = false, int $port = self::DEFAULT_PORT, bool $udp = false)
+    public function __construct($logging = false, int $port = self::DEFAULT_PORT, bool $udp = false)
     {
-        if ($logging)
-        {
+        if ($logging) {
             $this->enableLogging();
         }
-        $this->port=$port;
-        $this->timeout=self::DEFAULT_TIMEOUT;
-        $this->udp=$udp;
-        $this->types=new dnsTypes();
-        set_error_handler(array($this,'error_handler'));
-        $this->writelog("dnsProtocol Class Initialised");
+        $this->port = $port;
+        $this->timeout = self::DEFAULT_TIMEOUT;
+        $this->udp = $udp;
+        $this->types = new dnsTypes();
+        set_error_handler([$this, 'error_handler']);
+        $this->writelog('dnsProtocol Class Initialised');
     }
 
-    function __destruct()
+    public function __destruct()
     {
-        if ($this->logging)
-        {
+        if ($this->logging) {
             $this->showLog();
         }
     }
 
     /**
-     * @param int $errno
+     * @param int         $errno
      * @param string|null $errStr
      * @param string|null $errFile
-     * @param int|null $errLine
-     * @return bool
+     * @param int|null    $errLine
+     *
      * @throws dnsException
+     *
+     * @return bool
      */
-    function error_handler($errno = 0, $errStr = null, $errFile = null, $errLine = null)
+    public function error_handler($errno = 0, $errStr = null, $errFile = null, $errLine = null)
     {
         // If error is suppressed with @, don't throw an exception
-        if (error_reporting() === 0)
-        {
+        if (error_reporting() === 0) {
             return true; // return true to continue through the others error handlers
         }
+
         throw new dnsException('Found '.$errStr.' in line '.$errLine.' of '.$errFile, $errno, null);
     }
 
@@ -137,27 +133,24 @@ class dnsProtocol
         switch ($this->currentState) {
             // we have a socket open
             case self::STATE_OPEN:
-                if ($this->udp)
-                {
-                    if (!fwrite($this->socket, $this->requestHeader, $this->requestHeaderSize))
-                    {
+                if ($this->udp) {
+                    if (!fwrite($this->socket, $this->requestHeader, $this->requestHeaderSize)) {
                         //throw new dnsException("Failed to write question to socket");
-                        $this->closeWithError("Failed to write question to socket");
+                        $this->closeWithError('Failed to write question to socket');
+
                         return;
                     }
-                }
-                else
-                {
-                    if (!fwrite($this->socket, $this->requestHeaderSizeBin)) // write the socket
-                    {
+                } else {
+                    if (!fwrite($this->socket, $this->requestHeaderSizeBin)) { // write the socket
                         //throw new dnsException("Failed to write question length to TCP socket");
-                        $this->closeWithError("Failed to write question length to TCP socket");
+                        $this->closeWithError('Failed to write question length to TCP socket');
+
                         return;
                     }
-                    if (!fwrite($this->socket, $this->requestHeader, $this->requestHeaderSize))
-                    {
+                    if (!fwrite($this->socket, $this->requestHeader, $this->requestHeaderSize)) {
                         //throw new dnsException("Failed to write question to TCP socket");
-                        $this->closeWithError("Failed to write question to TCP socket");
+                        $this->closeWithError('Failed to write question to TCP socket');
+
                         return;
                     }
                 }
@@ -168,40 +161,39 @@ class dnsProtocol
 
             // waiting for response
             case self::STATE_AWAITING:
-                if ($this->udp)
-                {
+                if ($this->udp) {
                     $this->rawBuffer = fread($this->socket, 4096);
-                    if (!$this->rawBuffer) // read until the end with UDP
-                    {
+                    if (!$this->rawBuffer) { // read until the end with UDP
                         if (microtime(true) - $this->awaitingStarted > $this->timeout) {
-                            $this->closeWithError("Failed to read (timeout)");
+                            $this->closeWithError('Failed to read (timeout)');
                         }
+
                         return;
                     }
                     $this->currentState = self::STATE_PRE_READY;
                 } else {
-                    $this->returnSize=fread($this->socket,2);
-                    if (!$this->returnSize)
-                    {
+                    $this->returnSize = fread($this->socket, 2);
+                    if (!$this->returnSize) {
                         if (microtime(true) - $this->awaitingStarted > $this->timeout) {
-                            $this->closeWithError("empty return");
+                            $this->closeWithError('empty return');
                         }
+
                         return;
                     }
                     $this->currentState = self::STATE_AWAITING_TCP;
                 }
                 break;
             case self::STATE_AWAITING_TCP:
-                $tmplen=unpack("nlength",$this->returnSize);
-                $datasize=$tmplen['length'];
+                $tmplen = unpack('nlength', $this->returnSize);
+                $datasize = $tmplen['length'];
                 //$this->writeLog("TCP Stream Length Limit ".$datasize);
-                $this->rawBuffer=fread($this->socket,$datasize);
-                if (!$this->rawBuffer)
-                {
+                $this->rawBuffer = fread($this->socket, $datasize);
+                if (!$this->rawBuffer) {
                     if (microtime(true) - $this->awaitingStarted > $this->timeout) {
                         //throw new dnsException("Failed to read data buffer");
-                        $this->closeWithError("Failed to read data buffer");
+                        $this->closeWithError('Failed to read data buffer');
                     }
+
                     return;
                 }
                 fclose($this->socket);
@@ -224,40 +216,36 @@ class dnsProtocol
     }
 
     /**
-     * @param string $question
-     * @param string $type
-     * @param callable $cb function(?dnsResponse $response)
+     * @param string   $question
+     * @param string   $type
+     * @param callable $cb       function(?dnsResponse $response)
+     *
      * @throws dnsException
      */
     public function QueryAsync(string $question, string $type, callable $cb): void
     {
-        $typeid=$this->types->getByName($type);
-        if ($typeid===false)
-        {
-            throw new dnsException("Invalid Query Type ".$type);
+        $typeid = $this->types->getByName($type);
+        if ($typeid === false) {
+            throw new dnsException('Invalid Query Type '.$type);
         }
 
-        if ($this->udp)
-        {
-            $host="udp://".$this->server;
+        if ($this->udp) {
+            $host = 'udp://'.$this->server;
+        } else {
+            $host = $this->server;
         }
-        else
-        {
-            $host=$this->server;
-        }
-        if (!$this->socket=@fsockopen($host,$this->port,$errno,$errstr,$this->timeout))
-        {
-            throw new dnsException("Failed to open socket to ".$host);
+        if (!$this->socket = @fsockopen($host, $this->port, $errno, $errstr, $this->timeout)) {
+            throw new dnsException('Failed to open socket to '.$host);
         }
 
         stream_set_blocking($this->socket, false);
         list($header, $headersize, $headersizebin) = $this->prepareRequestHeaders($question, $type, $typeid);
 
-        if ( ($this->udp) && ($headersize>=512) )
-        {
+        if (($this->udp) && ($headersize >= 512)) {
             fclose($this->socket);
             $this->socket = null;
-            throw new dnsException("Question too big for UDP (".$headersize." bytes)");
+
+            throw new dnsException('Question too big for UDP ('.$headersize.' bytes)');
         }
 
         $this->cb = $cb;
@@ -270,83 +258,75 @@ class dnsProtocol
     /**
      * @param $question
      * @param string $type
-     * @return dnsResponse
+     *
      * @throws dnsException
+     *
+     * @return dnsResponse
      */
-    function Query($question,$type='A')
+    public function Query($question, $type = 'A')
     {
-        $typeid=$this->types->getByName($type);
-        if ($typeid===false)
-        {
-            throw new dnsException("Invalid Query Type ".$type);
+        $typeid = $this->types->getByName($type);
+        if ($typeid === false) {
+            throw new dnsException('Invalid Query Type '.$type);
         }
 
-        if ($this->udp)
-        {
-            $host="udp://".$this->server;
+        if ($this->udp) {
+            $host = 'udp://'.$this->server;
+        } else {
+            $host = $this->server;
         }
-        else
-        {
-            $host=$this->server;
-        }
-        if (!$socket=@fsockopen($host,$this->port,$errno,$errstr,$this->timeout))
-        {
-            throw new dnsException("Failed to open socket to ".$host);
+        if (!$socket = @fsockopen($host, $this->port, $errno, $errstr, $this->timeout)) {
+            throw new dnsException('Failed to open socket to '.$host);
         }
 
         list($header, $headerSize, $headerSizeBin) = $this->prepareRequestHeaders($question, $type, $typeid);
 
-        if ( ($this->udp) && ($headerSize>=512) )
-        {
+        if (($this->udp) && ($headerSize >= 512)) {
             fclose($socket);
-            throw new dnsException("Question too big for UDP (".$headerSize." bytes)");
+
+            throw new dnsException('Question too big for UDP ('.$headerSize.' bytes)');
         }
 
-        if ($this->udp) // UDP method
-        {
-            if (!fwrite($socket,$header,$headerSize))
-            {
+        if ($this->udp) { // UDP method
+            if (!fwrite($socket, $header, $headerSize)) {
                 fclose($socket);
-                throw new dnsException("Failed to write question to socket");
+
+                throw new dnsException('Failed to write question to socket');
             }
-            if (!$this->rawBuffer=fread($socket,4096)) // read until the end with UDP
-            {
+            if (!$this->rawBuffer = fread($socket, 4096)) { // read until the end with UDP
                 fclose($socket);
-                throw new dnsException("Failed to write read data buffer");
+
+                throw new dnsException('Failed to write read data buffer');
             }
-        }
-        else // TCP method
-        {
-            if (!fwrite($socket,$headerSizeBin)) // write the socket
-            {
+        } else { // TCP method
+            if (!fwrite($socket, $headerSizeBin)) { // write the socket
                 fclose($socket);
-                throw new dnsException("Failed to write question length to TCP socket");
+
+                throw new dnsException('Failed to write question length to TCP socket');
             }
-            if (!fwrite($socket,$header,$headerSize))
-            {
+            if (!fwrite($socket, $header, $headerSize)) {
                 fclose($socket);
-                throw new dnsException("Failed to write question to TCP socket");
+
+                throw new dnsException('Failed to write question to TCP socket');
             }
-            if (!$returnsize=fread($socket,2))
-            {
+            if (!$returnsize = fread($socket, 2)) {
                 fclose($socket);
             }
-            $tmplen=unpack("nlength",$returnsize);
-            $datasize=$tmplen['length'];
-            $this->writeLog("TCP Stream Length Limit ".$datasize);
-            if (!$this->rawBuffer=fread($socket,$datasize))
-            {
+            $tmplen = unpack('nlength', $returnsize);
+            $datasize = $tmplen['length'];
+            $this->writeLog('TCP Stream Length Limit '.$datasize);
+            if (!$this->rawBuffer = fread($socket, $datasize)) {
                 fclose($socket);
-                throw new dnsException("Failed to read data buffer");
+
+                throw new dnsException('Failed to read data buffer');
             }
         }
         fclose($socket);
 
-        $buffersize=strlen($this->rawBuffer);
-        $this->writelog("Read Buffer Size ".$buffersize);
-        if ($buffersize<12)
-        {
-            throw new dnsException("DNS query return buffer too small");
+        $buffersize = strlen($this->rawBuffer);
+        $this->writelog('Read Buffer Size '.$buffersize);
+        if ($buffersize < 12) {
+            throw new dnsException('DNS query return buffer too small');
         }
 
         return $this->prepareResponse();
@@ -364,13 +344,13 @@ class dnsProtocol
 
     /**
      * @param int $timeout
+     *
      * @throws dnsException
      */
     public function setTimeout($timeout = self::DEFAULT_TIMEOUT)
     {
-        if (!$new_timeout = floatval($timeout) || $timeout < 0)
-        {
-            throw new dnsException("Incorrect timeout value: <" . $timeout . ">. Timeout must be positive number.");
+        if (!$new_timeout = floatval($timeout) || $timeout < 0) {
+            throw new dnsException('Incorrect timeout value: <'.$timeout.'>. Timeout must be positive number.');
         }
         $this->timeout = $new_timeout;
     }
@@ -397,32 +377,29 @@ class dnsProtocol
 
     private function showLog()
     {
-        echo "==== LOG ====";
-        foreach ($this->logEntries as $logentry)
-        {
+        echo '==== LOG ====';
+        foreach ($this->logEntries as $logentry) {
             echo $logentry."\n";
         }
     }
 
     private function writeLog($text)
     {
-        if ($this->logging)
-        {
-            $this->logEntries[] = "-----".date("Y-m-d H:i:s")."-----".$text."-----";
+        if ($this->logging) {
+            $this->logEntries[] = '-----'.date('Y-m-d H:i:s').'-----'.$text.'-----';
         }
     }
 
-    function algorithm($code)
+    public function algorithm($code)
     {
-        # Reference:
-        # http://www.iana.org/protocols
-        # http://www.iana.org/assignments/dns-sec-alg-numbers/dns-sec-alg-numbers.xml
-        switch ($code)
-        {
+        // Reference:
+        // http://www.iana.org/protocols
+        // http://www.iana.org/assignments/dns-sec-alg-numbers/dns-sec-alg-numbers.xml
+        switch ($code) {
             case 1:
                 return 'md5';
             case 2:
-                # Diffie-Helman
+                // Diffie-Helman
                 return 'dh';
             case 3:
             case 5:
@@ -450,64 +427,71 @@ class dnsProtocol
         }
     }
 
-    function registrynameservers($tld)
+    public function registrynameservers($tld)
     {
         $ns = new dnsNameserver();
+
         return $ns->getNs($tld);
     }
 
-    function base32encode($input, $padding = true) {
-
-        $map = array(
+    public function base32encode($input, $padding = true)
+    {
+        $map = [
             '0', '1', '2', '3', '4', '5', '6', '7', //  7
             '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', // 15
             'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', // 23
             'o', 'p', 'q', 'r', 's', 't', 'u', 'v', // 31
-            '='  // padding char
-        );
+            '=',  // padding char
+        ];
 
-        if(empty($input)) return "";
+        if (empty($input)) {
+            return '';
+        }
         $input = str_split($input);
-        $binaryString = "";
-        for($i = 0; $i < count($input); $i++) {
+        $binaryString = '';
+        for ($i = 0; $i < count($input); $i++) {
             $binaryString .= str_pad(base_convert(ord($input[$i]), 10, 2), 8, '0', STR_PAD_LEFT);
         }
         $fiveBitBinaryArray = str_split($binaryString, 5);
-        $base32 = "";
-        $i=0;
-        while($i < count($fiveBitBinaryArray)) {
-            $base32 .= $map[base_convert(str_pad($fiveBitBinaryArray[$i], 5,'0'), 2, 10)];
+        $base32 = '';
+        $i = 0;
+        while ($i < count($fiveBitBinaryArray)) {
+            $base32 .= $map[base_convert(str_pad($fiveBitBinaryArray[$i], 5, '0'), 2, 10)];
             $i++;
         }
-        if($padding && ($x = strlen($binaryString) % 40) != 0) {
-            if($x == 8) $base32 .= str_repeat($map[32], 6);
-            else if($x == 16) $base32 .= str_repeat($map[32], 4);
-            else if($x == 24) $base32 .= str_repeat($map[32], 3);
-            else if($x == 32) $base32 .= $map[32];
+        if ($padding && ($x = strlen($binaryString) % 40) != 0) {
+            if ($x == 8) {
+                $base32 .= str_repeat($map[32], 6);
+            } elseif ($x == 16) {
+                $base32 .= str_repeat($map[32], 4);
+            } elseif ($x == 24) {
+                $base32 .= str_repeat($map[32], 3);
+            } elseif ($x == 32) {
+                $base32 .= $map[32];
+            }
         }
+
         return $base32;
     }
 
     /** @noinspection PhpUnused */
-    function nsec3hash($qname, $salt=null, $iterations='-')
+    public function nsec3hash($qname, $salt = null, $iterations = '-')
     {
-        $salt = pack('H*' , $salt);
+        $salt = pack('H*', $salt);
         $iterations = intval($iterations);
-        $toHash='';
+        $toHash = '';
 
         $qparts = explode('.', strtolower($qname).'.');
-        foreach ($qparts as $part)
-        {
+        foreach ($qparts as $part) {
             $toHash .= chr(strlen($part)).$part;
         }
 
-        do
-        {
+        do {
             $toHash .= $salt;
             $toHash = sha1($toHash, true);
             $iterations--;
-        }
-        while ($iterations >= 0);
+        } while ($iterations >= 0);
+
         return $this->base32encode($toHash);
     }
 
@@ -517,7 +501,7 @@ class dnsProtocol
     protected function decodeResponse(): ?dnsResponse
     {
         $buffersize = strlen($this->rawBuffer);
-        $this->writelog("Read Buffer Size " . $buffersize);
+        $this->writelog('Read Buffer Size '.$buffersize);
         if ($buffersize < 12) {
             //throw new dnsException("DNS query return buffer too small");
             return null;
@@ -543,33 +527,33 @@ class dnsProtocol
     /**
      * @param string $question
      * @param string $type
-     * @param int $typeid
+     * @param int    $typeid
+     *
      * @return array
      */
     protected function prepareRequestHeaders(string $question, string $type, int $typeid): array
     {
         $labels = [];
         // Split Into Labels
-        if (preg_match("/[a-z|A-Z]/", $question) == 0) // IP Address
-        {
-            $labeltmp = explode(".", $question);    // reverse ARPA format
+        if (preg_match('/[a-z|A-Z]/', $question) == 0) { // IP Address
+            $labeltmp = explode('.', $question);    // reverse ARPA format
             for ($i = count($labeltmp) - 1; $i >= 0; $i--) {
                 $labels[] = $labeltmp[$i];
             }
-            $labels[] = "IN-ADDR";
-            $labels[] = "ARPA";
+            $labels[] = 'IN-ADDR';
+            $labels[] = 'ARPA';
         } else {
-            $labels = explode(".", $question);
+            $labels = explode('.', $question);
         }
-        $question_binary = "";
+        $question_binary = '';
         for ($a = 0; $a < count($labels); $a++) {
             $size = strlen($labels[$a]);
-            $question_binary .= pack("C", $size); // size byte first
+            $question_binary .= pack('C', $size); // size byte first
             $question_binary .= $labels[$a]; // then the label
         }
-        $question_binary .= pack("C", 0); // end it off
+        $question_binary .= pack('C', 0); // end it off
 
-        $this->writeLog("Question: " . $question . " (type=" . $type . "/" . $typeid . ")");
+        $this->writeLog('Question: '.$question.' (type='.$type.'/'.$typeid.')');
 
         $id = rand(1, 255) | (rand(0, 255) << 8);    // generate the ID
 
@@ -579,19 +563,19 @@ class dnsProtocol
         $opcode = 0x0000; // opcode
 
         // Build the header
-        $header = "";
-        $header .= pack("n", $id);
-        $header .= pack("n", $opcode | $flags);
-        $header .= pack("nnnn", 1, 0, 0, 0);
+        $header = '';
+        $header .= pack('n', $id);
+        $header .= pack('n', $opcode | $flags);
+        $header .= pack('nnnn', 1, 0, 0, 0);
         $header .= $question_binary;
-        $header .= pack("n", $typeid);
-        $header .= pack("n", 0x0001); // internet class
+        $header .= pack('n', $typeid);
+        $header .= pack('n', 0x0001); // internet class
         $headerSize = strlen($header);
-        $headerSizeBin = pack("n", $headerSize);
+        $headerSizeBin = pack('n', $headerSize);
 
-        $this->writeLog("Header Length: " . $headerSize . " Bytes");
+        $this->writeLog('Header Length: '.$headerSize.' Bytes');
 
-        return array($header, $headerSize, $headerSizeBin);
+        return [$header, $headerSize, $headerSizeBin];
     }
 
     /**
@@ -601,7 +585,7 @@ class dnsProtocol
     {
         $this->rawHeader = substr($this->rawBuffer, 0, 12); // first 12 bytes is the header
         $this->rawresponse = substr($this->rawBuffer, 12); // after that the response
-        $this->header = unpack("nid/nflags/nqdcount/nancount/nnscount/narcount", $this->rawHeader);
+        $this->header = unpack('nid/nflags/nqdcount/nancount/nnscount/narcount', $this->rawHeader);
         $flags = sprintf("%016b\n", $this->header['flags']);
         $response = new dnsResponse();
 
@@ -613,12 +597,12 @@ class dnsProtocol
         $response->setDnssecAware($flags[11] == '1');
         $response->setAnswerCount($this->header['ancount']);
 
-        $this->writeLog("Query returned " . $this->header['ancount'] . " Answers");
+        $this->writeLog('Query returned '.$this->header['ancount'].' Answers');
 
         // Deal with the header question data
         if ($this->header['qdcount'] > 0) {
             $response->setQueryCount($this->header['qdcount']);
-            $this->writeLog("Found " . $this->header['qdcount'] . " questions");
+            $this->writeLog('Found '.$this->header['qdcount'].' questions');
             $q = '';
             for ($a = 0; $a < $this->header['qdcount']; $a++) {
                 $c = 1;
@@ -631,23 +615,23 @@ class dnsProtocol
             }
         }
 
-        $this->writeLog("Found " . $this->header['ancount'] . " answer records");
+        $this->writeLog('Found '.$this->header['ancount'].' answer records');
         $response->setResourceResultCount($this->header['ancount']);
         for ($a = 0; $a < $this->header['ancount']; $a++) {
             $response->ReadRecord($this->rawBuffer, dnsResponse::RESULTTYPE_RESOURCE);
         }
 
-        $this->writeLog("Found " . $this->header['nscount'] . " authorative records");
+        $this->writeLog('Found '.$this->header['nscount'].' authorative records');
         $response->setNameserverResultCount($this->header['nscount']);
         for ($a = 0; $a < $this->header['nscount']; $a++) {
             $response->ReadRecord($this->rawBuffer, dnsResponse::RESULTTYPE_NAMESERVER);
         }
         $response->setAdditionalResultCount($this->header['arcount']);
-        $this->writeLog("Found " . $this->header['arcount'] . " additional records");
+        $this->writeLog('Found '.$this->header['arcount'].' additional records');
         for ($a = 0; $a < $this->header['arcount']; $a++) {
             $response->ReadRecord($this->rawBuffer, dnsResponse::RESULTTYPE_ADDITIONAL);
         }
+
         return $response;
     }
-
 }

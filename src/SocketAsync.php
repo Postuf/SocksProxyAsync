@@ -7,10 +7,10 @@ declare(strict_types=1);
 namespace SocksProxyAsync;
 
 use Exception;
-use Metaregistrar\DNS\dnsAresult;
-use Metaregistrar\DNS\dnsException;
-use Metaregistrar\DNS\dnsProtocol;
-use Metaregistrar\DNS\dnsResponse;
+use SocksProxyAsync\DNS\dnsAresult;
+use SocksProxyAsync\DNS\dnsException;
+use SocksProxyAsync\DNS\dnsProtocol;
+use SocksProxyAsync\DNS\dnsResponse;
 
 /**
  * Class which manages native socket as socks5-connected socket

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Integration;
 
-use Metaregistrar\DNS\dnsException;
 use PHPUnit\Framework\TestCase;
 use SocksProxyAsync\Constants;
+use SocksProxyAsync\DNS\dnsException;
 use SocksProxyAsync\Proxy;
 use SocksProxyAsync\SocketAsync;
 use SocksProxyAsync\SocketAsyncCallback;

@@ -1,5 +1,6 @@
 <?php
 
+/** @noinspection PhpUnused */
 /** @noinspection SpellCheckingInspection */
 
 namespace SocksProxyAsync\DNS;
@@ -7,11 +8,17 @@ namespace SocksProxyAsync\DNS;
 class dnsResponse
 {
     protected $responsecounter;
+    /** @var dnsResult[] */
     protected $resourceResults;
+    /** @var dnsResult[] */
     protected $nameserverResults;
+    /** @var dnsResult[] */
     protected $additionalResults;
+    /** @var int */
     protected $resourceResponses;
+    /** @var int */
     protected $nameserverResponses;
+    /** @var int */
     protected $additionalResponses;
     protected $queries;
     private $questions;
@@ -42,7 +49,7 @@ class dnsResponse
         $this->additionalResults = [];
     }
 
-    public function addResult($result, $recordtype)
+    public function addResult(dnsResult $result, string $recordtype)
     {
         switch ($recordtype) {
             case self::RESULTTYPE_RESOURCE:
@@ -55,12 +62,8 @@ class dnsResponse
                 $this->additionalResults[] = $result;
                 break;
             default:
-                //$this->responsecounter = 12;
                 break;
         }
-        //
-        // Reset response counter to start at beginning of response
-        //
     }
 
     public function addQuery($query)
@@ -180,17 +183,19 @@ class dnsResponse
         return $return;
     }
 
-    public function ReadRecord($buffer, $resulttype = '')
+    /**
+     * @param string $buffer
+     * @param string $resulttype
+     * @throws dnsException
+     */
+    public function ReadRecord(string $buffer, string $resulttype = '')
     {
         $domain = $this->ReadDomainLabel($buffer);
         $ans_header_bin = $this->ReadResponse($buffer, 10); // 10 byte header
         $ans_header = unpack('ntype/nclass/Nttl/nlength', $ans_header_bin);
-        //echo "Record Type ".$ans_header['type']." Class ".$ans_header['class']." TTL ".$ans_header['ttl']." Length ".$ans_header['length']."\n";
-        //$this->DebugBinary($buffer);
         $types = new DNSTypes();
-        $typeid = $types->getById($ans_header['type']);
-        //$extras = array();
-        switch ($typeid) {
+        $typeId = $types->getById((int) $ans_header['type']);
+        switch ($typeId) {
             case 'A':
                 $result = new dnsAresult(implode('.', unpack('Ca/Cb/Cc/Cd', $this->ReadResponse($buffer, 4))));
                 break;
@@ -271,7 +276,6 @@ class dnsResponse
 
             default: // something we can't deal with
                 $result = new dnsResult();
-                //echo "Length: ".$ans_header['length']."\n";
                 $stuff = $this->ReadResponse($buffer, $ans_header['length']);
                 $result->setData($stuff);
                 break;
@@ -279,7 +283,7 @@ class dnsResponse
         }
         $result->setDomain($domain);
         $result->setType($ans_header['type']);
-        $result->setTypeId($typeid);
+        $result->setTypeId($typeId);
         $result->setClass($ans_header['class']);
         $result->setTtl($ans_header['ttl']);
         $this->addResult($result, $resulttype);
@@ -293,9 +297,8 @@ class dnsResponse
             $ac += (($i & 1) ? $keyp[1] : $keyp[1] << 8);
         }
         $ac += ($ac >> 16) & 0xFFFF;
-        $keytag = $ac & 0xFFFF;
 
-        return $keytag;
+        return $ac & 0xFFFF;
     }
 
     private function keytag2($key, $keysize)
@@ -306,9 +309,8 @@ class dnsResponse
             $ac += ($i % 2 ? $keyp[1] : 256 * $keyp[1]);
         }
         $ac += ($ac / 65536) % 65536;
-        $keytag = $ac % 65536;
 
-        return $keytag;
+        return $ac % 65536;
     }
 
     private function ReadDomainLabel($buffer)
@@ -321,7 +323,7 @@ class dnsResponse
         return $domain;
     }
 
-    private function ReadDomainLabels($buffer, $offset, &$counter = 0)
+    private function ReadDomainLabels($buffer, $offset, &$counter = 0): array
     {
         $labels = [];
         $startoffset = $offset;
@@ -351,32 +353,32 @@ class dnsResponse
         return $labels;
     }
 
-    public function setResourceResultCount($count)
+    public function setResourceResultCount(int $count): void
     {
         $this->resourceResponses = $count;
     }
 
-    public function getResourceResultCount()
+    public function getResourceResultCount(): int
     {
         return $this->resourceResponses;
     }
 
-    public function setNameserverResultCount($count)
+    public function setNameserverResultCount(int $count): void
     {
         $this->nameserverResponses = $count;
     }
 
-    public function getNameserverResultCount()
+    public function getNameserverResultCount(): int
     {
         return $this->nameserverResponses;
     }
 
-    public function setAdditionalResultCount($count)
+    public function setAdditionalResultCount(int $count): void
     {
         $this->additionalResponses = $count;
     }
 
-    public function getAdditionalResultCount()
+    public function getAdditionalResultCount(): int
     {
         return $this->additionalResponses;
     }

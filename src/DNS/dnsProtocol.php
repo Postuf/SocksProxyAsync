@@ -1,5 +1,6 @@
 <?php
 
+/** @noinspection PhpUnused */
 /** @noinspection SpellCheckingInspection */
 
 namespace SocksProxyAsync\DNS;
@@ -20,6 +21,8 @@ class dnsProtocol
     private $rawHeader;
     /** @var string */
     private $rawBuffer;
+    /** @var string */
+    private $rawResponse;
 
     /** @var string|null */
     private $returnSize;
@@ -128,6 +131,9 @@ class dnsProtocol
         $this->currentQuery = null;
     }
 
+    /**
+     * @throws dnsException
+     */
     public function poll(): void
     {
         switch ($this->currentState) {
@@ -390,11 +396,14 @@ class dnsProtocol
         }
     }
 
-    public function algorithm($code)
+    /**
+     * @see http://www.iana.org/protocols
+     * @see http://www.iana.org/assignments/dns-sec-alg-numbers/dns-sec-alg-numbers.xml
+     * @param int $code
+     * @return string
+     */
+    public function algorithm(int $code)
     {
-        // Reference:
-        // http://www.iana.org/protocols
-        // http://www.iana.org/assignments/dns-sec-alg-numbers/dns-sec-alg-numbers.xml
         switch ($code) {
             case 1:
                 return 'md5';
@@ -497,6 +506,7 @@ class dnsProtocol
 
     /**
      * @return dnsResponse
+     * @throws dnsException
      */
     protected function decodeResponse(): ?dnsResponse
     {
@@ -580,11 +590,12 @@ class dnsProtocol
 
     /**
      * @return dnsResponse
+     * @throws dnsException
      */
     protected function prepareResponse(): dnsResponse
     {
         $this->rawHeader = substr($this->rawBuffer, 0, 12); // first 12 bytes is the header
-        $this->rawresponse = substr($this->rawBuffer, 12); // after that the response
+        $this->rawResponse = substr($this->rawBuffer, 12); // after that the response
         $this->header = unpack('nid/nflags/nqdcount/nancount/nnscount/narcount', $this->rawHeader);
         $flags = sprintf("%016b\n", $this->header['flags']);
         $response = new dnsResponse();
@@ -616,17 +627,17 @@ class dnsProtocol
         }
 
         $this->writeLog('Found '.$this->header['ancount'].' answer records');
-        $response->setResourceResultCount($this->header['ancount']);
+        $response->setResourceResultCount((int) $this->header['ancount']);
         for ($a = 0; $a < $this->header['ancount']; $a++) {
             $response->ReadRecord($this->rawBuffer, dnsResponse::RESULTTYPE_RESOURCE);
         }
 
         $this->writeLog('Found '.$this->header['nscount'].' authorative records');
-        $response->setNameserverResultCount($this->header['nscount']);
+        $response->setNameserverResultCount((int) $this->header['nscount']);
         for ($a = 0; $a < $this->header['nscount']; $a++) {
             $response->ReadRecord($this->rawBuffer, dnsResponse::RESULTTYPE_NAMESERVER);
         }
-        $response->setAdditionalResultCount($this->header['arcount']);
+        $response->setAdditionalResultCount((int) $this->header['arcount']);
         $this->writeLog('Found '.$this->header['arcount'].' additional records');
         for ($a = 0; $a < $this->header['arcount']; $a++) {
             $response->ReadRecord($this->rawBuffer, dnsResponse::RESULTTYPE_ADDITIONAL);

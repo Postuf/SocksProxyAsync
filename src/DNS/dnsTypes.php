@@ -1,6 +1,7 @@
 <?php
 
 /** @noinspection SpellCheckingInspection */
+declare(strict_types=1);
 
 namespace SocksProxyAsync\DNS;
 
@@ -9,21 +10,27 @@ namespace SocksProxyAsync\DNS;
  */
 class dnsTypes
 {
-    /** @var array */
+    /** @var string[] */
     public $typesById = [];
-    /** @var array */
+    /** @var int[] */
     public $typesByName = [];
 
-    /**
-     * @param int    $id
-     * @param string $name
-     */
-    private function addType($id, $name)
+    private function addType(int $id, string $name)
     {
         $this->typesById[$id] = $name;
         $this->typesByName[$name] = $id;
     }
 
+    /**
+     * dnsTypes constructor.
+     *
+     * @see https://tools.ietf.org/html/rfc1035 A, NS, CNAME, ...
+     * @see https://tools.ietf.org/html/rfc2308 SOA
+     * @see https://tools.ietf.org/html/rfc7505 MX
+     * @see https://tools.ietf.org/html/rfc1183 RP
+     * @see https://tools.ietf.org/html/rfc5864 AFSDB
+     * @see https://tools.ietf.org/html/draft-ietf-dane-openpgpkey-12
+     */
     public function __construct()
     {
         $this->addType(1, 'A'); // RFC1035
@@ -109,7 +116,7 @@ class dnsTypes
      *
      * @return int
      */
-    public function getByName($name)
+    public function getByName(string $name): int
     {
         if (isset($this->typesByName[$name])) {
             return $this->typesByName[$name];
@@ -125,7 +132,7 @@ class dnsTypes
      *
      * @return string
      */
-    public function getById($id)
+    public function getById(int $id): string
     {
         if (isset($this->typesById[$id])) {
             return $this->typesById[$id];

@@ -5,6 +5,7 @@ namespace SocksProxyAsync\DNS;
 class dnsResult
 {
     private $type;
+    /** @var string */
     private $typeId;
     private $class;
     private $ttl;
@@ -12,6 +13,7 @@ class dnsResult
     private $domain;
     private $string;
     private $record;
+    /** @var array */
     private $extras = [];
 
     public function __construct()
@@ -29,12 +31,12 @@ class dnsResult
         $this->type = $type;
     }
 
-    public function setTypeId($typeId)
+    public function setTypeId(string $typeId): void
     {
         $this->typeId = $typeId;
     }
 
-    public function getTypeId()
+    public function getTypeId(): string
     {
         return $this->typeId;
     }

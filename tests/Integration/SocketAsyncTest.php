@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Integration;
 
-use Metaregistrar\DNS\dnsException;
+use SocksProxyAsync\DNS\dnsException;
 use PHPUnit\Framework\TestCase;
 use SocksProxyAsync\Constants;
 use SocksProxyAsync\Proxy;

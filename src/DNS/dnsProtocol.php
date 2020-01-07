@@ -399,7 +399,9 @@ class dnsProtocol
     /**
      * @see http://www.iana.org/protocols
      * @see http://www.iana.org/assignments/dns-sec-alg-numbers/dns-sec-alg-numbers.xml
+     *
      * @param int $code
+     *
      * @return string
      */
     public function algorithm(int $code)
@@ -505,8 +507,9 @@ class dnsProtocol
     }
 
     /**
-     * @return dnsResponse
      * @throws dnsException
+     *
+     * @return dnsResponse
      */
     protected function decodeResponse(): ?dnsResponse
     {
@@ -589,8 +592,9 @@ class dnsProtocol
     }
 
     /**
-     * @return dnsResponse
      * @throws dnsException
+     *
+     * @return dnsResponse
      */
     protected function prepareResponse(): dnsResponse
     {

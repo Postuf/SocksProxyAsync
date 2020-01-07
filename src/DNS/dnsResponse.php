@@ -186,6 +186,7 @@ class dnsResponse
     /**
      * @param string $buffer
      * @param string $resulttype
+     *
      * @throws dnsException
      */
     public function ReadRecord(string $buffer, string $resulttype = '')

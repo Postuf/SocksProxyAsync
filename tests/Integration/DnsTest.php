@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Integration;
@@ -17,7 +18,7 @@ class DnsTest extends TestCase
         $dns->setServer('8.8.8.8');
         $question = 'google.com';
         /** @noinspection PhpUnhandledExceptionInspection */
-        $result = $dns->Query($question,'A');
+        $result = $dns->Query($question, 'A');
         /* @var $result dnsResponse */
         $found = false;
         foreach ($result->getResourceResults() as $resource) {
@@ -29,7 +30,7 @@ class DnsTest extends TestCase
         $this->assertEquals(true, $found);
 
         /** @noinspection PhpUnhandledExceptionInspection */
-        $result = $dns->Query($question,'MX');
+        $result = $dns->Query($question, 'MX');
         /* @var $result dnsResponse */
         $found = false;
         foreach ($result->getResourceResults() as $resource) {

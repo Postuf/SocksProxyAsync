@@ -127,7 +127,7 @@ class SocketAsync extends Socks5Socket implements Async
             case self::STATE_RESOLVE:
                 if (preg_match('/\d+\.\d+\.\d+\.\d+/', $this->proxy->getServer())) {
                     $this->step->setStep(self::STATE_CONNECT);
-                } else if ($this->proxy->getServer() === 'localhost') {
+                } elseif ($this->proxy->getServer() === 'localhost') {
                     $this->proxy->setServer('127.0.0.1');
                 } else {
                     if (!$this->cbSet) {

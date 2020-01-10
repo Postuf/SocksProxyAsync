@@ -142,7 +142,6 @@ class SocketAsyncTest extends TestCase
         $this->socket->stop();
     }
 
-
     /**
      * @test
      *

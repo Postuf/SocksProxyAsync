@@ -16,8 +16,10 @@ class SocketAsyncTest extends TestCase
 {
     /** @see node subdir */
     private const HOST = '127.0.0.1';
+    private const HOSTNAME = 'localhost';
     private const PORT = '8080';
     private const PROXY = '127.0.0.1:1080';
+    private const PROXY_HOSTNAME = 'localhost:1080';
     private const DEFAULT_DNS_FOR_TEST = '127.0.0.1:9999';
 
     /** @var SocketAsync */
@@ -109,7 +111,45 @@ class SocketAsyncTest extends TestCase
      * @throws SocksException
      * @throws dnsException
      */
-    public function test_socket_works(): void
+    public function test_socket_works_with_name(): void
+    {
+        $this->proxy = new Proxy(static::PROXY_HOSTNAME);
+        $this->socket = new SocketAsync($this->proxy, self::HOSTNAME, self::PORT);
+        $this->assertEquals(self::HOSTNAME, $this->socket->getHost());
+
+        while (!$this->socket->ready()) {
+            $this->socket->poll();
+        }
+
+        // http req body
+        $br = "\r\n";
+        $data = "GET /test{$br}Host: 127.0.0.1:8080{$br}Accept: identity{$br}{$br}";
+
+        $writtenBytes = $this->socket->write($data);
+        $this->assertEquals($writtenBytes, strlen($data));
+        usleep(2000000);
+        $response = $this->socket->read(4096);
+        $lines = explode("\n", trim($response));
+        foreach ($lines as $k => $line) {
+            if ($line && trim($line) === 'Connection: close') {
+                unset($lines[$k]);
+            }
+        }
+        $lines = array_values($lines);
+        $lastLine = $lines[count($lines) - 1];
+        /* @see node/http/test */
+        $this->assertEquals('test', $lastLine);
+        $this->socket->stop();
+    }
+
+
+    /**
+     * @test
+     *
+     * @throws SocksException
+     * @throws dnsException
+     */
+    public function test_socket_works_with_ip(): void
     {
         $this->assertEquals(self::HOST, $this->socket->getHost());
 

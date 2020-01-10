@@ -198,14 +198,19 @@ class Socks5Socket
      */
     protected function connectSocksSocket(): void
     {
-        $host = $this->host;
+        $host = trim($this->host);
         $port = $this->port;
         $hostnameLenBinary = chr(strlen($host));
         $portBinary = unpack('C*', pack('L', $port));
         $portBinary = chr($portBinary[2]).chr($portBinary[1]);
 
         // client connection request
-        $establishmentMsg = "\x05\x01\x00\x03".$hostnameLenBinary.$host.$portBinary;
+        $isIpV4 = preg_match('/^\d+\.\d+\.\d+\.\d+$/', $host);
+        $typeByte = $isIpV4 ? "\x01" : "\x03";
+        $hostInfo = $isIpV4
+            ? pack('N', ip2long($host))
+            : $hostnameLenBinary.$host;
+        $establishmentMsg = "\x05\x01\x00$typeByte".$hostInfo.$portBinary;
         $this->write($establishmentMsg);
     }
 

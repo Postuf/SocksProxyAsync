@@ -56,13 +56,13 @@ class SocketAsync extends Socks5Socket implements Async
         Proxy $proxy,
         $host,
         $port,
-        int $timeOutSeconds = Constants::DEFAULT_TIMEOUT,
+        int $timeOutSeconds = Constants::SOCKET_CONNECT_TIMEOUT_SEC,
         ?string $dnsHostAndPort = null
     ) {
         parent::__construct($proxy, $timeOutSeconds);
         $this->host = $host;
         $this->port = $port;
-        $this->step = new AsyncStep('Socks5SocketAsync_poll', Constants::SOCKET_CONNECT_TIMEOUT_SEC);
+        $this->step = new AsyncStep('Socks5SocketAsync_poll', $timeOutSeconds);
         $this->isReady = false;
         if (!$dnsHostAndPort) {
             $dnsHostAndPort = $this->getSystemDnsHost() ?: self::DEFAULT_DNS_SERVER;

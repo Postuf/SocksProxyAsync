@@ -44,7 +44,12 @@ class Socks5Socket
         $this->timeoutSeconds = $timeOutSeconds;
     }
 
-    /***
+    public function __destruct()
+    {
+        $this->disconnect();
+    }
+
+    /**
      * Closes active connection
      * @return void
      */

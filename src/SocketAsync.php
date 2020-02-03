@@ -28,6 +28,8 @@ class SocketAsync extends Socks5Socket implements Async
     public const STATE_READ_STATUS = 50;
     public const DEFAULT_DNS_SERVER = '8.8.8.8';
     private const ETC_RESOLV_CONF = '/etc/resolv.conf';
+    private const ADDRESS_TYPE_A = 'A';
+    private const DNS_TTL_SEC = 300;
 
     /**
      * @var AsyncStep
@@ -41,11 +43,15 @@ class SocketAsync extends Socks5Socket implements Async
     protected $resolver;
 
     /** @var bool */
-    protected $cbSet = false;
+    protected $resolveCallbackSet = false;
     /** @var bool */
     protected $nameReady = false;
     /** @var string|null */
     private $dnsHostAndPort;
+    /**
+     * @var array[] name -> ['ipv4', time()]
+     */
+    protected static $dnsCache = [];
 
     /**
      * @param Proxy  $proxy
@@ -146,23 +152,34 @@ class SocketAsync extends Socks5Socket implements Async
                     $this->step->setStep(self::STATE_CONNECT);
                 } elseif ($this->proxy->getServer() === 'localhost') {
                     $this->proxy->setServer('127.0.0.1');
+                } elseif ($this->hasDnsCache($this->proxy->getServer())) {
+                    $this->proxy->setServer(self::$dnsCache[$this->proxy->getServer()][0]);
+                    $this->nameReady = true;
+                    $this->step->setStep(self::STATE_CONNECT);
                 } else {
-                    if (!$this->cbSet) {
-                        $this->getResolver()->QueryAsync($this->proxy->getServer(), 'A', function (?dnsResponse $result, ?string $error = null) {
-                            if (!$error) {
-                                foreach ($result->getResourceResults() as $resource) {
-                                    if ($resource instanceof dnsAresult) {
-                                        //echo $resource->getDomain() . ' - ' . $resource->getIpv4() . ' - ' . $resource->getTtl() . "\n";
-                                        $this->proxy->setServer($resource->getIpv4());
+                    if (!$this->resolveCallbackSet) {
+                        $this->getResolver()->QueryAsync(
+                            $this->proxy->getServer(),
+                            self::ADDRESS_TYPE_A,
+                            function (?dnsResponse $result, ?string $error = null) {
+                                if (!$error) {
+                                    foreach ($result->getResourceResults() as $resource) {
+                                        if ($resource instanceof dnsAresult) {
+                                            self::$dnsCache[$this->proxy->getServer()] = [
+                                                $resource->getIpv4(),
+                                                time(),
+                                            ];
+                                            $this->proxy->setServer($resource->getIpv4());
+                                        }
                                     }
+                                } else {
+                                    throw new SocksException(SocksException::CONNECTION_NOT_ESTABLISHED, $error);
                                 }
-                            } else {
-                                throw new SocksException(SocksException::CONNECTION_NOT_ESTABLISHED, $error);
+                                $this->nameReady = true;
+                                $this->clearResolver();
                             }
-                            $this->nameReady = true;
-                            $this->clearResolver();
-                        });
-                        $this->cbSet = true;
+                        );
+                        $this->resolveCallbackSet = true;
                     }
 
                     if (!$this->nameReady) {
@@ -237,6 +254,19 @@ class SocketAsync extends Socks5Socket implements Async
     public function ready(): bool
     {
         return $this->isReady;
+    }
+
+    private function hasDnsCache(string $server): bool
+    {
+        if (isset(self::$dnsCache[$server])) {
+            if (self::$dnsCache[$server][1] < time() - self::DNS_TTL_SEC) {
+                unset(self::$dnsCache[$server]);
+            } else {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     protected function createSocket(): void

@@ -141,20 +141,17 @@ class dnsProtocol
             case self::STATE_OPEN:
                 if ($this->udp) {
                     if (!fwrite($this->socket, $this->requestHeader, $this->requestHeaderSize)) {
-                        //throw new dnsException("Failed to write question to socket");
                         $this->closeWithError('Failed to write question to socket');
 
                         return;
                     }
                 } else {
                     if (!fwrite($this->socket, $this->requestHeaderSizeBin)) { // write the socket
-                        //throw new dnsException("Failed to write question length to TCP socket");
                         $this->closeWithError('Failed to write question length to TCP socket');
 
                         return;
                     }
                     if (!fwrite($this->socket, $this->requestHeader, $this->requestHeaderSize)) {
-                        //throw new dnsException("Failed to write question to TCP socket");
                         $this->closeWithError('Failed to write question to TCP socket');
 
                         return;
@@ -192,11 +189,9 @@ class dnsProtocol
             case self::STATE_AWAITING_TCP:
                 $tmplen = unpack('nlength', $this->returnSize);
                 $datasize = $tmplen['length'];
-                //$this->writeLog("TCP Stream Length Limit ".$datasize);
                 $this->rawBuffer = fread($this->socket, $datasize);
                 if (!$this->rawBuffer) {
                     if (microtime(true) - $this->awaitingStarted > $this->timeout) {
-                        //throw new dnsException("Failed to read data buffer");
                         $this->closeWithError('Failed to read data buffer');
                     }
 

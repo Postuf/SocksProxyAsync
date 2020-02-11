@@ -210,13 +210,16 @@ class SocketAsync extends Socks5Socket implements Async
 
     /**
      * @throws SocksException
-     * @throws dnsException
      */
     public function poll(): void
     {
         if (!$this->afterSteps()) {
-            if ($this->baseSteps()) {
-                return;
+            try {
+                if ($this->baseSteps()) {
+                    return;
+                }
+            } catch (dnsException $e) {
+                throw new SocksException(SocksException::CONNECTION_NOT_ESTABLISHED, $e->getMessage());
             }
         }
 

@@ -6,7 +6,6 @@ namespace Integration;
 
 use PHPUnit\Framework\TestCase;
 use SocksProxyAsync\Constants;
-use SocksProxyAsync\DNS\dnsException;
 use SocksProxyAsync\Proxy;
 use SocksProxyAsync\SocketAsync;
 use SocksProxyAsync\SocketAsyncCallback;
@@ -109,7 +108,6 @@ class SocketAsyncTest extends TestCase
      * @test
      *
      * @throws SocksException
-     * @throws dnsException
      */
     public function test_socket_works_with_name(): void
     {
@@ -146,7 +144,6 @@ class SocketAsyncTest extends TestCase
      * @test
      *
      * @throws SocksException
-     * @throws dnsException
      */
     public function test_socket_works_with_ip(): void
     {
@@ -181,7 +178,6 @@ class SocketAsyncTest extends TestCase
      * @test
      *
      * @throws SocksException
-     * @throws dnsException
      * @noinspection PhpUnusedParameterInspection
      */
     public function test_socket_cb_works(): void
@@ -224,7 +220,6 @@ class SocketAsyncTest extends TestCase
 
     /**
      * @throws SocksException
-     * @throws dnsException
      */
     public function test_throw_on_incorrect_port(): void
     {

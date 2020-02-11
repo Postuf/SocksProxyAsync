@@ -156,6 +156,8 @@ class SocketAsync extends Socks5Socket implements Async
                                         $this->proxy->setServer($resource->getIpv4());
                                     }
                                 }
+                            } else {
+                                throw new SocksException(SocksException::CONNECTION_NOT_ESTABLISHED, $error);
                             }
                             $this->nameReady = true;
                             $this->clearResolver();

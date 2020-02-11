@@ -177,6 +177,8 @@ class dnsProtocol
 
                         return;
                     }
+                    stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
+                    fclose($this->socket);
                     $this->currentState = self::STATE_PRE_READY;
                 } else {
                     $this->returnSize = fread($this->socket, 2);

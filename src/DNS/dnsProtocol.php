@@ -197,6 +197,7 @@ class dnsProtocol
 
                     return;
                 }
+                stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
                 fclose($this->socket);
                 $this->currentState = self::STATE_PRE_READY;
 
@@ -243,6 +244,7 @@ class dnsProtocol
         list($header, $headersize, $headersizebin) = $this->prepareRequestHeaders($question, $type, $typeid);
 
         if (($this->udp) && ($headersize >= 512)) {
+            stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
             fclose($this->socket);
             $this->socket = null;
 
@@ -283,6 +285,7 @@ class dnsProtocol
         list($header, $headerSize, $headerSizeBin) = $this->prepareRequestHeaders($question, $type, $typeid);
 
         if (($this->udp) && ($headerSize >= 512)) {
+            stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
             fclose($socket);
 
             throw new dnsException('Question too big for UDP ('.$headerSize.' bytes)');
@@ -290,38 +293,45 @@ class dnsProtocol
 
         if ($this->udp) { // UDP method
             if (!fwrite($socket, $header, $headerSize)) {
+                stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
                 fclose($socket);
 
                 throw new dnsException('Failed to write question to socket');
             }
             if (!$this->rawBuffer = fread($socket, 4096)) { // read until the end with UDP
+                stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
                 fclose($socket);
 
                 throw new dnsException('Failed to write read data buffer');
             }
         } else { // TCP method
             if (!fwrite($socket, $headerSizeBin)) { // write the socket
+                stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
                 fclose($socket);
 
                 throw new dnsException('Failed to write question length to TCP socket');
             }
             if (!fwrite($socket, $header, $headerSize)) {
+                stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
                 fclose($socket);
 
                 throw new dnsException('Failed to write question to TCP socket');
             }
             if (!$returnsize = fread($socket, 2)) {
+                stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
                 fclose($socket);
             }
             $tmplen = unpack('nlength', $returnsize);
             $datasize = $tmplen['length'];
             $this->writeLog('TCP Stream Length Limit '.$datasize);
             if (!$this->rawBuffer = fread($socket, $datasize)) {
+                stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
                 fclose($socket);
 
                 throw new dnsException('Failed to read data buffer');
             }
         }
+        stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
         fclose($socket);
 
         $buffersize = strlen($this->rawBuffer);
@@ -520,6 +530,7 @@ class dnsProtocol
 
     protected function closeWithError(string $error): void
     {
+        stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
         fclose($this->socket);
         $this->currentState = self::STATE_READY;
         $cb = $this->cb;

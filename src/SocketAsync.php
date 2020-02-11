@@ -259,7 +259,7 @@ class SocketAsync extends Socks5Socket implements Async
      */
     protected function connectSocket(): bool
     {
-        if ($this->socksSocket !== false) {
+        if ($this->socksSocket != false) {
             @socket_connect($this->socksSocket, $this->proxy->getServer(), (int) $this->proxy->getPort());
             $lastError = socket_last_error($this->socksSocket);
             if ($lastError == SOCKET_EINPROGRESS || $lastError == SOCKET_EALREADY) {

@@ -103,6 +103,10 @@ class dnsProtocol
         if ($this->logging) {
             $this->showLog();
         }
+
+        if ($this->cb && $this->currentState != self::STATE_READY) {
+            $this->closeWithError('closing on destruct');
+        }
     }
 
     /**

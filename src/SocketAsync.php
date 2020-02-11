@@ -44,6 +44,8 @@ class SocketAsync extends Socks5Socket implements Async
     protected $cbSet = false;
     /** @var bool */
     protected $nameReady = false;
+    /** @var string|null */
+    private $dnsHostAndPort;
 
     /**
      * @param Proxy  $proxy
@@ -68,13 +70,28 @@ class SocketAsync extends Socks5Socket implements Async
             $dnsHostAndPort = $this->getSystemDnsHost() ?: self::DEFAULT_DNS_SERVER;
         }
 
-        $dnsPort = dnsProtocol::DEFAULT_PORT;
-        $dnsHost = $dnsHostAndPort;
-        if (strpos($dnsHost, ':') !== false) {
-            [$dnsHost, $dnsPort] = explode(':', $dnsHostAndPort);
+        $this->dnsHostAndPort = $dnsHostAndPort;
+    }
+
+    protected function clearResolver(): void
+    {
+        unset($this->resolver);
+    }
+
+    protected function getResolver(): dnsProtocol
+    {
+        if (!$this->resolver) {
+            $dnsPort = dnsProtocol::DEFAULT_PORT;
+            $dnsHost = $this->dnsHostAndPort;
+            if (strpos($dnsHost, ':') !== false) {
+                [$dnsHost, $dnsPort] = explode(':', $this->dnsHostAndPort);
+            }
+
+            $this->resolver = new dnsProtocol(false, (int) $dnsPort, true);
+            $this->resolver->setServer($dnsHost);
         }
-        $this->resolver = new dnsProtocol(false, (int) $dnsPort, true);
-        $this->resolver->setServer($dnsHost);
+
+        return $this->resolver;
     }
 
     private function getSystemDnsHost(): ?string
@@ -131,7 +148,7 @@ class SocketAsync extends Socks5Socket implements Async
                     $this->proxy->setServer('127.0.0.1');
                 } else {
                     if (!$this->cbSet) {
-                        $this->resolver->QueryAsync($this->proxy->getServer(), 'A', function (?dnsResponse $result, ?string $error = null) {
+                        $this->getResolver()->QueryAsync($this->proxy->getServer(), 'A', function (?dnsResponse $result, ?string $error = null) {
                             if (!$error) {
                                 foreach ($result->getResourceResults() as $resource) {
                                     if ($resource instanceof dnsAresult) {
@@ -141,12 +158,13 @@ class SocketAsync extends Socks5Socket implements Async
                                 }
                             }
                             $this->nameReady = true;
+                            $this->clearResolver();
                         });
                         $this->cbSet = true;
                     }
 
                     if (!$this->nameReady) {
-                        $this->resolver->poll();
+                        $this->getResolver()->poll();
                     }
                 }
                 break;

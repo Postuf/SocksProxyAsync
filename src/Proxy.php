@@ -22,10 +22,10 @@ class Proxy
     private $login = null;
 
     /**
-     * Proxy constructor.
      * Proxy formats:
      *      1) host:port
      *      2) host:port|login:password
+     * are supported.
      *
      * @param string $serverAndPort
      * @param int    $type

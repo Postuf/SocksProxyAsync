@@ -177,8 +177,8 @@ class dnsProtocol
 
                         return;
                     }
-                    stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
-                    fclose($this->socket);
+                    @stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
+                    @fclose($this->socket);
                     $this->currentState = self::STATE_PRE_READY;
                 } else {
                     $this->returnSize = fread($this->socket, 2);
@@ -203,8 +203,8 @@ class dnsProtocol
 
                     return;
                 }
-                stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
-                fclose($this->socket);
+                @stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
+                @fclose($this->socket);
                 $this->currentState = self::STATE_PRE_READY;
 
                 break;
@@ -250,8 +250,8 @@ class dnsProtocol
         list($header, $headersize, $headersizebin) = $this->prepareRequestHeaders($question, $type, $typeid);
 
         if (($this->udp) && ($headersize >= 512)) {
-            stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
-            fclose($this->socket);
+            @stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
+            @fclose($this->socket);
             $this->socket = null;
 
             throw new dnsException('Question too big for UDP ('.$headersize.' bytes)');
@@ -536,8 +536,10 @@ class dnsProtocol
 
     protected function closeWithError(string $error): void
     {
-        stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
-        fclose($this->socket);
+        if ($this->socket) {
+            @stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
+            @fclose($this->socket);
+        }
         $this->currentState = self::STATE_READY;
         $cb = $this->cb;
         $cb(null, $error);

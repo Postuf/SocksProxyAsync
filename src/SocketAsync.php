@@ -173,7 +173,11 @@ class SocketAsync extends Socks5Socket implements Async
                                         }
                                     }
                                 } else {
-                                    throw new SocksException(SocksException::CONNECTION_NOT_ESTABLISHED, $error);
+                                    if ($error !== dnsProtocol::ERROR_CLOSING_ON_DESTRUCT) {
+                                        throw new SocksException(SocksException::CONNECTION_NOT_ESTABLISHED, $error);
+                                    } else {
+                                        return;
+                                    }
                                 }
                                 $this->nameReady = true;
                                 $this->clearResolver();

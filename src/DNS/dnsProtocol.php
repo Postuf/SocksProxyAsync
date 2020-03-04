@@ -15,6 +15,8 @@ class dnsProtocol
 
     public const DEFAULT_PORT = 53;
 
+    public const ERROR_CLOSING_ON_DESTRUCT = 'closing on destruct';
+
     /** @var string */
     private $header;
     /** @var string */
@@ -105,7 +107,7 @@ class dnsProtocol
         }
 
         if ($this->cb && $this->currentState != self::STATE_READY) {
-            $this->closeWithError('closing on destruct');
+            $this->closeWithError(self::ERROR_CLOSING_ON_DESTRUCT);
         }
     }
 

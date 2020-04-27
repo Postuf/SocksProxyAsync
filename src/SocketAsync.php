@@ -11,6 +11,7 @@ use SocksProxyAsync\DNS\dnsAresult;
 use SocksProxyAsync\DNS\dnsException;
 use SocksProxyAsync\DNS\dnsProtocol;
 use SocksProxyAsync\DNS\dnsResponse;
+use SocksProxyAsync\DNS\SystemDNS;
 
 /**
  * Class which manages native socket as socks5-connected socket
@@ -27,7 +28,6 @@ class SocketAsync extends Socks5Socket implements Async
     public const STATE_SOCKET_CONNECT = 40;
     public const STATE_READ_STATUS = 50;
     public const DEFAULT_DNS_SERVER = '8.8.8.8';
-    private const ETC_RESOLV_CONF = '/etc/resolv.conf';
     private const ADDRESS_TYPE_A = 'A';
     private const DNS_TTL_SEC = 300;
 
@@ -73,7 +73,7 @@ class SocketAsync extends Socks5Socket implements Async
         $this->step = new AsyncStep('Socks5SocketAsync_poll', $timeOutSeconds);
         $this->isReady = false;
         if (!$dnsHostAndPort) {
-            $dnsHostAndPort = $this->getSystemDnsHost() ?: self::DEFAULT_DNS_SERVER;
+            $dnsHostAndPort = (new SystemDNS())->getSystemDnsHost() ?: self::DEFAULT_DNS_SERVER;
         }
 
         $this->dnsHostAndPort = $dnsHostAndPort;
@@ -98,30 +98,6 @@ class SocketAsync extends Socks5Socket implements Async
         }
 
         return $this->resolver;
-    }
-
-    private function getSystemDnsHost(): ?string
-    {
-        if (!file_exists(self::ETC_RESOLV_CONF)) {
-            return null;
-        }
-
-        $contents = file_get_contents(self::ETC_RESOLV_CONF);
-        $lines = explode("\n", $contents);
-        foreach ($lines as $line) {
-            $line = trim($line);
-            if (strpos($line, '#') !== false) {
-                $line = substr($line, 0, strpos($line, '#'));
-                $line = trim($line);
-            }
-            if (strpos($line, 'nameserver ') !== false) {
-                $line = str_replace('nameserver ', '', $line);
-
-                return trim($line);
-            }
-        }
-
-        return null;
     }
 
     /**

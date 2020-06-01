@@ -251,7 +251,7 @@ class SocketAsync extends Socks5Socket implements Async
         } catch (Exception $e) {
             $this->stop();
 
-            throw new SocksException(SocksException::STEP_STUCK);
+            throw new SocksException(SocksException::STEP_STUCK, $e->getMessage());
         }
     }
 

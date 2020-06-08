@@ -161,27 +161,7 @@ class SocketAsync extends Socks5Socket implements Async
                         $this->getResolver()->QueryAsync(
                             $this->proxy->getServer(),
                             self::ADDRESS_TYPE_A,
-                            function (?dnsResponse $result, ?string $error = null) {
-                                if (!$error) {
-                                    foreach ($result->getResourceResults() as $resource) {
-                                        if ($resource instanceof dnsAresult) {
-                                            self::$dnsCache[$this->proxy->getServer()] = [
-                                                $resource->getIpv4(),
-                                                time(),
-                                            ];
-                                            $this->proxy->setServer($resource->getIpv4());
-                                        }
-                                    }
-                                } else {
-                                    if ($error !== dnsProtocol::ERROR_CLOSING_ON_DESTRUCT) {
-                                        throw new SocksException(SocksException::CONNECTION_NOT_ESTABLISHED, $error);
-                                    } else {
-                                        return;
-                                    }
-                                }
-                                $this->nameReady = true;
-                                $this->clearResolver();
-                            }
+                            $this->getDnsResolveHandler()
                         );
                         $this->resolveCallbackSet = true;
                     }
@@ -231,6 +211,31 @@ class SocketAsync extends Socks5Socket implements Async
         return false;
     }
 
+    private function getDnsResolveHandler(): callable
+    {
+        return function (?dnsResponse $result, ?string $error = null) {
+            if (!$error && $result) {
+                foreach ($result->getResourceResults() as $resource) {
+                    if ($resource instanceof dnsAresult) {
+                        self::$dnsCache[$this->proxy->getServer()] = [
+                            $resource->getIpv4(),
+                            time(),
+                        ];
+                        $this->proxy->setServer($resource->getIpv4());
+                    }
+                }
+            } else {
+                if ($error !== dnsProtocol::ERROR_CLOSING_ON_DESTRUCT) {
+                    throw new SocksException(SocksException::CONNECTION_NOT_ESTABLISHED, $error);
+                }
+
+                return;
+            }
+            $this->nameReady = true;
+            $this->clearResolver();
+        };
+    }
+
     /**
      * @throws SocksException
      */
@@ -251,7 +256,7 @@ class SocketAsync extends Socks5Socket implements Async
         } catch (Exception $e) {
             $this->stop();
 
-            throw new SocksException(SocksException::STEP_STUCK);
+            throw new SocksException(SocksException::STEP_STUCK, $e->getMessage());
         }
     }
 
@@ -293,16 +298,18 @@ class SocketAsync extends Socks5Socket implements Async
      */
     protected function connectSocket(): bool
     {
-        if ($this->socksSocket != false) {
+        if ($this->socksSocket !== false) {
             @socket_connect($this->socksSocket, $this->proxy->getServer(), (int) $this->proxy->getPort());
             $lastError = socket_last_error($this->socksSocket);
-            if ($lastError == SOCKET_EINPROGRESS || $lastError == SOCKET_EALREADY) {
+            if ($lastError === SOCKET_EINPROGRESS || $lastError === SOCKET_EALREADY) {
                 return false;
-            } elseif ($lastError == SOCKET_EISCONN) {
-                return true;
-            } else {
-                throw new SocksException(SocksException::UNREACHABLE_PROXY, 'on connect: '.$lastError);
             }
+
+            if ($lastError === SOCKET_EISCONN) {
+                return true;
+            }
+
+            throw new SocksException(SocksException::UNREACHABLE_PROXY, 'on connect: '.$lastError);
         }
 
         return false;

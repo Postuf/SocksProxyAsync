@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SocksProxyAsync;
 
 use Exception;
+use RuntimeException;
 
 class AsyncStep
 {
@@ -45,7 +46,6 @@ class AsyncStep
     {
         $this->stepName = $stepName;
         $this->criticalTimeSeconds = $criticalTimeSeconds;
-        $this->neverRun = true;
     }
 
     public function setStep(int $stepIdentity): void
@@ -75,7 +75,7 @@ class AsyncStep
         return $this->finished;
     }
 
-    private function resetStep()
+    private function resetStep(): void
     {
         $this->stepStart = microtime(true);
         $this->stepTries = 0;
@@ -97,7 +97,7 @@ class AsyncStep
         }
 
         if ($this->finished) {
-            throw new Exception(Constants::ERR_SOCKET_ASYNC_STEP_FINISHED);
+            throw new RuntimeException(Constants::ERR_SOCKET_ASYNC_STEP_FINISHED);
         }
         if ($this->neverRun) {
             $this->neverRun = false;
@@ -108,13 +108,21 @@ class AsyncStep
         $this->stepDurations[] = microtime(true) - $this->stepStart;
 
         if ((microtime(true) - $this->stepStart) > $this->criticalTimeSeconds) {
-            throw new Exception(
+            throw new RuntimeException(
                 Constants::ERR_SOCKET_ASYNC_STEP_TOO_LONG.' '.
                 'Step stucked: '.$this->stepName.
                 ', stepNo: '.$this->step.
                 ', tries: '.$this->stepTries.
-                ', durations: '.print_r($this->stepDurations, true)
+                ', durations: '.$this->formatDurations()
             );
         }
+    }
+
+    private function formatDurations(): string
+    {
+        $count = count($this->stepDurations);
+        $last = end($this->stepDurations);
+
+        return $count > 0 ? ("$count: [{$this->stepDurations[0]}, ..., $last]") : '0';
     }
 }

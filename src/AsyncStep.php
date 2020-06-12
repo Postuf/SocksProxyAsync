@@ -18,9 +18,9 @@ class AsyncStep
      */
     private $stepTries = 0;
     /**
-     * @var array
+     * @var float
      */
-    private $stepDurations = [];
+    private $stepDuration = 0.0;
     /**
      * @var int
      */
@@ -79,7 +79,7 @@ class AsyncStep
     {
         $this->stepStart = microtime(true);
         $this->stepTries = 0;
-        $this->stepDurations = [];
+        $this->stepDuration = 0.0;
     }
 
     protected function isStable(int $step): bool
@@ -105,7 +105,7 @@ class AsyncStep
         }
 
         $this->stepTries++;
-        $this->stepDurations[] = microtime(true) - $this->stepStart;
+        $this->stepDuration = microtime(true) - $this->stepStart;
 
         if ((microtime(true) - $this->stepStart) > $this->criticalTimeSeconds) {
             throw new RuntimeException(
@@ -113,16 +113,8 @@ class AsyncStep
                 'Step stucked: '.$this->stepName.
                 ', stepNo: '.$this->step.
                 ', tries: '.$this->stepTries.
-                ', durations: '.$this->formatDurations()
+                ', durations: '."{$this->stepTries}: {$this->stepDuration}"
             );
         }
-    }
-
-    private function formatDurations(): string
-    {
-        $count = count($this->stepDurations);
-        $last = end($this->stepDurations);
-
-        return $count > 0 ? ("$count: [{$this->stepDurations[0]}, ..., $last]") : '0';
     }
 }

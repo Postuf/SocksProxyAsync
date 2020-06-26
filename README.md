@@ -8,7 +8,7 @@ Asynchronous SOCKS5 client library
 
 ## Requirements
 
-* PHP 7.1+
+* PHP 7.3+
 * Composer
   * ext-sockets
 

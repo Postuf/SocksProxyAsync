@@ -17,9 +17,9 @@ class Proxy
     private $type;
 
     /** @var string|null */
-    private $password = null;
+    private $password;
     /** @var string|null */
-    private $login = null;
+    private $login;
 
     /**
      * Proxy formats:
@@ -34,7 +34,7 @@ class Proxy
      */
     public function __construct(string $serverAndPort, int $type = self::TYPE_SOCKS5)
     {
-        if (strstr($serverAndPort, '|')) {
+        if (strpos($serverAndPort, '|') !== false) {
             $parts = explode('|', $serverAndPort);
             if (count($parts) !== 2) {
                 throw new SocksException(SocksException::PROXY_BAD_FORMAT);
@@ -47,16 +47,16 @@ class Proxy
             $this->setLoginPassword($auth[0], $auth[1]);
         }
         $proxyPath = explode(':', $serverAndPort);
-        if (count($proxyPath) != 2) {
+        if (count($proxyPath) !== 2) {
             throw new SocksException(SocksException::PROXY_BAD_FORMAT);
         }
         $this->server = trim($proxyPath[0]);
         $this->port = trim($proxyPath[1]);
 
-        if ($type != self::TYPE_HTTP && $type != self::TYPE_SOCKS5) {
+        if ($type !== self::TYPE_HTTP && $type !== self::TYPE_SOCKS5) {
             throw new SocksException(SocksException::PROXY_BAD_FORMAT);
         }
-        $this->type = (int) $type;
+        $this->type = $type;
     }
 
     /**

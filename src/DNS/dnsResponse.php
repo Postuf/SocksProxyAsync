@@ -7,6 +7,12 @@ namespace SocksProxyAsync\DNS;
 
 class dnsResponse
 {
+    private const C64K = 65536;
+    public const RESULTTYPE_RESOURCE = 'resource';
+    public const RESULTTYPE_NAMESERVER = 'nameserver';
+    public const RESULTTYPE_ADDITIONAL = 'additional';
+
+    /** @var int */
     protected $responsecounter;
     /** @var dnsResult[] */
     protected $resourceResults;
@@ -20,6 +26,7 @@ class dnsResponse
     protected $nameserverResponses;
     /** @var int */
     protected $additionalResponses;
+    /** @var array */
     protected $queries;
     private $questions;
     private $answers;
@@ -29,10 +36,6 @@ class dnsResponse
     private $recursionAvailable;
     private $authenticated;
     private $dnssecAware;
-
-    const RESULTTYPE_RESOURCE = 'resource';
-    const RESULTTYPE_NAMESERVER = 'nameserver';
-    const RESULTTYPE_ADDITIONAL = 'additional';
 
     public function __construct()
     {
@@ -49,7 +52,7 @@ class dnsResponse
         $this->additionalResults = [];
     }
 
-    public function addResult(dnsResult $result, string $recordtype)
+    public function addResult(dnsResult $result, string $recordtype): void
     {
         switch ($recordtype) {
             case self::RESULTTYPE_RESOURCE:
@@ -66,17 +69,17 @@ class dnsResponse
         }
     }
 
-    public function addQuery($query)
+    public function addQuery($query): void
     {
         $this->queries[] = $query;
     }
 
-    public function getQueries()
+    public function getQueries(): array
     {
         return $this->queries;
     }
 
-    public function setAnswerCount($count)
+    public function setAnswerCount($count): void
     {
         $this->answers = $count;
     }
@@ -86,7 +89,7 @@ class dnsResponse
         return $this->answers;
     }
 
-    public function setQueryCount($count)
+    public function setQueryCount($count): void
     {
         $this->questions = $count;
     }
@@ -96,88 +99,89 @@ class dnsResponse
         return $this->questions;
     }
 
-    public function setAuthorative($flag)
+    public function setAuthorative($flag): void
     {
         $this->authorative = $flag;
     }
 
-    public function getAuthorative()
+    public function getAuthorative(): bool
     {
         return $this->authorative;
     }
 
-    public function setTruncated($flag)
+    public function setTruncated($flag): void
     {
         $this->truncated = $flag;
     }
 
-    public function getTruncated()
+    public function getTruncated(): bool
     {
         return $this->truncated;
     }
 
-    public function setRecursionRequested($flag)
+    public function setRecursionRequested($flag): void
     {
         $this->recursionRequested = $flag;
     }
 
-    public function getRecursionRequested()
+    public function getRecursionRequested(): bool
     {
         return $this->recursionRequested;
     }
 
-    public function setRecursionAvailable($flag)
+    public function setRecursionAvailable($flag): void
     {
         $this->recursionAvailable = $flag;
     }
 
-    public function getRecursionAvailable()
+    public function getRecursionAvailable(): bool
     {
         return $this->recursionAvailable;
     }
 
-    public function setAuthenticated($flag)
+    public function setAuthenticated($flag): void
     {
         $this->authenticated = $flag;
     }
 
-    public function getAuthenticated()
+    public function getAuthenticated(): bool
     {
         return $this->authenticated;
     }
 
-    public function setDnssecAware($flag)
+    public function setDnssecAware($flag): void
     {
         $this->dnssecAware = $flag;
     }
 
-    public function getDnssecAware()
+    public function getDnssecAware(): bool
     {
         return $this->dnssecAware;
     }
 
-    public function getResourceResults()
+    public function getResourceResults(): array
     {
         return $this->resourceResults;
     }
 
-    public function getNameserverResults()
+    public function getNameserverResults(): array
     {
         return $this->nameserverResults;
     }
 
-    public function getAdditionalResults()
+    public function getAdditionalResults(): array
     {
         return $this->additionalResults;
     }
 
-    public function ReadResponse($buffer, $count = 1, $offset = '')
+    public function ReadResponse($buffer, $count = 1, $offset = ''): string
     {
+        /** @noinspection TypeUnsafeComparisonInspection */
         if ($offset == '') { // no offset so use and increment the ongoing counter
-            $return = substr($buffer, $this->responsecounter, $count);
+            $return = (string) substr($buffer, $this->responsecounter, $count);
             $this->responsecounter += $count;
         } else {
-            $return = substr($buffer, $offset, $count);
+            $return = (string) substr($buffer, $offset, $count);
         }
 
         return $return;
@@ -188,8 +192,9 @@ class dnsResponse
      * @param string $resulttype
      *
      * @throws dnsException
+     * @noinspection TypeUnsafeComparisonInspection
      */
-    public function ReadRecord(string $buffer, string $resulttype = '')
+    public function ReadRecord(string $buffer, string $resulttype = ''): void
     {
         $domain = $this->ReadDomainLabel($buffer);
         $ans_header_bin = $this->ReadResponse($buffer, 10); // 10 byte header
@@ -265,7 +270,6 @@ class dnsResponse
 
             case 'RRSIG':
                 $stuff = $this->ReadResponse($buffer, 18);
-                //$length = $ans_header['length'] - 18;
                 $test = unpack('ntype/calgorithm/clabels/Noriginalttl/Nexpiration/Ninception/nkeytag', $stuff);
                 $result = new dnsRRSIGresult($test['type'], $test['algorithm'], $test['labels'], $test['originalttl'], $test['expiration'], $test['inception'], $test['keytag']);
                 $name = $this->ReadDomainLabel($buffer);
@@ -290,7 +294,7 @@ class dnsResponse
         $this->addResult($result, $resulttype);
     }
 
-    private function keytag($key, $keysize)
+    private function keytag($key, $keysize): int
     {
         $ac = 0;
         for ($i = 0; $i < $keysize; $i++) {
@@ -302,25 +306,25 @@ class dnsResponse
         return $ac & 0xFFFF;
     }
 
-    private function keytag2($key, $keysize)
+    private function keytag2($key, $keysize): int
     {
         $ac = 0;
         for ($i = 0; $i < $keysize; $i++) {
             $keyp = unpack('C', $key[$i]);
-            $ac += ($i % 2 ? $keyp[1] : 256 * $keyp[1]);
+            $ac += ($i % 2 === 1 ? $keyp[1] : 256 * $keyp[1]);
         }
-        $ac += ($ac / 65536) % 65536;
+        $ac += ($ac / self::C64K) % self::C64K;
 
-        return $ac % 65536;
+        return $ac % self::C64K;
     }
 
-    private function ReadDomainLabel($buffer)
+    private function ReadDomainLabel($buffer): string
     {
         $count = 0;
         $labels = $this->ReadDomainLabels($buffer, $this->responsecounter, $count);
         $domain = implode('.', $labels);
         $this->responsecounter += $count;
-        //$this->writeLog("Label ".$domain." len ".$count);
+
         return $domain;
     }
 
@@ -341,7 +345,6 @@ class dnsResponse
                 $nextitem = $this->ReadResponse($buffer, 1, $offset++);
                 $pointer_offset = (($label_len & 0x3f) << 8) + ord($nextitem);
                 // Branch Back Upon Ourselves...
-                //$this->writeLog("Label Offset: ".$pointer_offset);
                 $pointer_labels = $this->ReadDomainLabels($buffer, $pointer_offset);
                 foreach ($pointer_labels as $ptr_label) {
                     $labels[] = $ptr_label;
@@ -349,7 +352,7 @@ class dnsResponse
                 $return = true;
             }
         }
-        $counter = $offset - $startoffset;
+        $counter = (int) ($offset - $startoffset);
 
         return $labels;
     }

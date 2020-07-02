@@ -1,24 +1,24 @@
 <?php
 
+/** @noinspection PhpUnused */
+
 namespace SocksProxyAsync\DNS;
 
 class dnsResult
 {
     private $type;
-    /** @var string */
-    private $typeId;
     private $class;
-    private $ttl;
     private $data;
     private $domain;
-    private $string;
     private $record;
-    /** @var array */
-    private $extras = [];
+    /**
+     * @var string|null
+     */
+    private $typeId;
+    private $ttl;
 
     public function __construct()
     {
-        date_default_timezone_set('UTC');
     }
 
     public function getType()
@@ -26,7 +26,7 @@ class dnsResult
         return $this->type;
     }
 
-    public function setType($type)
+    public function setType($type): void
     {
         $this->type = $type;
     }
@@ -36,7 +36,7 @@ class dnsResult
         $this->typeId = $typeId;
     }
 
-    public function getTypeId(): string
+    public function getTypeId(): ?string
     {
         return $this->typeId;
     }
@@ -46,9 +46,14 @@ class dnsResult
         return $this->class;
     }
 
-    public function setClass($class)
+    public function setClass($class): void
     {
         $this->class = $class;
+    }
+
+    public function setTtl($ttl): void
+    {
+        $this->ttl = $ttl;
     }
 
     public function getTtl()
@@ -56,17 +61,12 @@ class dnsResult
         return $this->ttl;
     }
 
-    public function setTtl($ttl)
-    {
-        $this->ttl = $ttl;
-    }
-
     public function getData()
     {
         return $this->data;
     }
 
-    public function setData($data)
+    public function setData($data): void
     {
         $this->data = $data;
     }
@@ -76,19 +76,9 @@ class dnsResult
         return $this->domain;
     }
 
-    public function setDomain($domain)
+    public function setDomain($domain): void
     {
         $this->domain = $domain;
-    }
-
-    public function getString()
-    {
-        return $this->string;
-    }
-
-    public function setString($string)
-    {
-        $this->string = $string;
     }
 
     public function getRecord()
@@ -96,18 +86,8 @@ class dnsResult
         return $this->record;
     }
 
-    public function setRecord($record)
+    public function setRecord($record): void
     {
         $this->record = $record;
-    }
-
-    public function getExtras()
-    {
-        return $this->extras;
-    }
-
-    public function setExtras($extras)
-    {
-        $this->extras = $extras;
     }
 }

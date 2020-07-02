@@ -33,9 +33,6 @@ class SocketAsyncTest extends TestCase
         parent::setUp();
     }
 
-    /**
-     * @test
-     */
     public function test_async_socket_ip(): void
     {
         $proxy = new Proxy('127.0.0.1:1080');
@@ -57,9 +54,6 @@ class SocketAsyncTest extends TestCase
         $this->assertEquals(self::HOST, $socket->getHost());
     }
 
-    /**
-     * @test
-     */
     public function test_async_socket_ip_with_default_dns(): void
     {
         $proxy = new Proxy('127.0.0.1:1080');
@@ -80,9 +74,6 @@ class SocketAsyncTest extends TestCase
         $this->assertEquals(self::HOST, $socket->getHost());
     }
 
-    /**
-     * @test
-     */
     public function test_async_socket_name(): void
     {
         $proxy = new Proxy('localhost:1080');
@@ -105,8 +96,6 @@ class SocketAsyncTest extends TestCase
     }
 
     /**
-     * @test
-     *
      * @throws SocksException
      */
     public function test_socket_works_with_name(): void
@@ -144,8 +133,6 @@ class SocketAsyncTest extends TestCase
     }
 
     /**
-     * @test
-     *
      * @throws SocksException
      */
     public function test_socket_works_with_ip(): void
@@ -178,8 +165,6 @@ class SocketAsyncTest extends TestCase
     }
 
     /**
-     * @test
-     *
      * @throws SocksException
      * @noinspection PhpUnusedParameterInspection
      */
@@ -190,7 +175,7 @@ class SocketAsyncTest extends TestCase
             $this->proxy,
             self::HOST,
             self::PORT,
-            function (SocketAsyncCallback $socketAsyncCallback) use (&$ready) {
+            static function (SocketAsyncCallback $socketAsyncCallback) use (&$ready) {
                 $ready = true;
             }
         );
@@ -230,7 +215,6 @@ class SocketAsyncTest extends TestCase
         $socket = new SocketAsync($this->proxy, self::HOST, 9999);
         $this->expectException(SocksException::class);
         while (!$this->socket->ready()) {
-            /** @noinspection PhpUnhandledExceptionInspection */
             $socket->poll();
         }
     }

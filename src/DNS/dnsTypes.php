@@ -15,7 +15,7 @@ class dnsTypes
     /** @var int[] */
     public static $typesByName = [];
 
-    private static function addType(int $id, string $name)
+    private static function addType(int $id, string $name): void
     {
         self::$typesById[$id] = $name;
         self::$typesByName[$name] = $id;
@@ -120,9 +120,9 @@ class dnsTypes
     {
         if (isset(self::$typesByName[$name])) {
             return self::$typesByName[$name];
-        } else {
-            throw new dnsException("Invalid name $name specified on getByName");
         }
+
+        throw new dnsException("Invalid name $name specified on getByName");
     }
 
     /**
@@ -136,8 +136,8 @@ class dnsTypes
     {
         if (isset(self::$typesById[$id])) {
             return self::$typesById[$id];
-        } else {
-            throw new dnsException("Invalid id $id on getById");
         }
+
+        throw new dnsException("Invalid id $id on getById");
     }
 }

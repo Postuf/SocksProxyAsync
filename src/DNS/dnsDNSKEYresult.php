@@ -27,7 +27,7 @@ class dnsDNSKEYresult extends dnsResult
         $this->zonekey = false;
     }
 
-    public function setKeytag($keytag)
+    public function setKeytag($keytag): void
     {
         $this->keytag = $keytag;
     }
@@ -37,7 +37,7 @@ class dnsDNSKEYresult extends dnsResult
         return $this->keytag;
     }
 
-    public function setKeylength($keylength)
+    public function setKeylength($keylength): void
     {
         $this->keylength = $keylength;
     }
@@ -47,7 +47,7 @@ class dnsDNSKEYresult extends dnsResult
         return $this->keylength;
     }
 
-    public function setFlags($flags)
+    public function setFlags($flags): void
     {
         $this->flags = $flags;
     }
@@ -57,7 +57,7 @@ class dnsDNSKEYresult extends dnsResult
         return $this->flags;
     }
 
-    public function setAlgorithm($algorithm)
+    public function setAlgorithm($algorithm): void
     {
         $this->algorithm = $algorithm;
     }
@@ -67,7 +67,7 @@ class dnsDNSKEYresult extends dnsResult
         return $this->algorithm;
     }
 
-    public function setProtocol($protocol)
+    public function setProtocol($protocol): void
     {
         $this->protocol = $protocol;
     }
@@ -77,27 +77,27 @@ class dnsDNSKEYresult extends dnsResult
         return $this->protocol;
     }
 
-    public function setZoneKey($bool)
+    public function setZoneKey($bool): void
     {
         $this->zonekey = $bool;
     }
 
-    public function getZoneKey()
+    public function getZoneKey(): bool
     {
         return $this->zonekey;
     }
 
-    public function setSep($bool)
+    public function setSep($bool): void
     {
         $this->sep = $bool;
     }
 
-    public function getSep()
+    public function getSep(): bool
     {
         return $this->sep;
     }
 
-    public function setPublicKey($key)
+    public function setPublicKey($key): void
     {
         $this->publickey = $key;
     }
@@ -107,7 +107,7 @@ class dnsDNSKEYresult extends dnsResult
         return $this->publickey;
     }
 
-    public function setPublicKeyBase64($key)
+    public function setPublicKeyBase64($key): void
     {
         $this->publickeybase64 = $key;
     }

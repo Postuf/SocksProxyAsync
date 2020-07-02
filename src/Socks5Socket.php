@@ -14,7 +14,7 @@ class Socks5Socket
      *
      * @var resource
      */
-    protected $socksSocket = null;
+    protected $socksSocket;
     /**
      * Domain name, not IP address.
      *
@@ -82,7 +82,7 @@ class Socks5Socket
         $this->writeSocksGreeting();
         $socksGreetingConfig = $this->readSocksGreeting();
         $this->checkServerGreetedClient($socksGreetingConfig);
-        if ($this->checkGreetngWithAuth($socksGreetingConfig)) {
+        if ($this->checkGreetingWithAuth($socksGreetingConfig)) {
             $this->writeSocksAuth();
             $this->readSocksAuthStatus();
         }
@@ -123,7 +123,7 @@ class Socks5Socket
         return false;
     }
 
-    protected function writeSocksGreeting()
+    protected function writeSocksGreeting(): void
     {
         $helloMsg = "\x05\x02\x00\x02";
         $this->write($helloMsg);
@@ -144,7 +144,7 @@ class Socks5Socket
      *
      * @throws SocksException
      */
-    protected function checkServerGreetedClient($socksGreetingConfig)
+    protected function checkServerGreetedClient($socksGreetingConfig): void
     {
         if (!$socksGreetingConfig) {
             throw new SocksException(SocksException::CONNECTION_NOT_ESTABLISHED);
@@ -152,19 +152,19 @@ class Socks5Socket
         $socksVersion = ord($socksGreetingConfig[0]);
         $socksAuthType = ord($socksGreetingConfig[1]);
 
-        if ($socksVersion != 0x05) {
+        if ($socksVersion !== 0x05) {
             throw new SocksException(SocksException::UNEXPECTED_PROTOCOL_VERSION, $socksVersion);
         }
-        if ($socksAuthType != 0x00 && $socksAuthType != 0x02) {
+        if ($socksAuthType !== 0x00 && $socksAuthType !== 0x02) {
             throw new SocksException(SocksException::UNSUPPORTED_AUTH_TYPE, $socksAuthType);
         }
     }
 
-    protected function checkGreetngWithAuth(string $socksGreetingConfig)
+    protected function checkGreetingWithAuth(string $socksGreetingConfig): bool
     {
         $socksAuthType = ord($socksGreetingConfig[1]);
 
-        return $socksAuthType == 0x02;
+        return $socksAuthType === 0x02;
     }
 
     protected function writeSocksAuth(): void
@@ -189,6 +189,7 @@ class Socks5Socket
             return false;
         }
 
+        /** @noinspection TypeUnsafeComparisonInspection */
         if ($socksAuthStatus[0] != "\x01" || $socksAuthStatus[1] != "\x00") {
             throw new SocksException(SocksException::AUTH_FAILED);
         }
@@ -243,15 +244,15 @@ class Socks5Socket
      *
      * @throws SocksException
      */
-    protected function checkConnectionEstablished($serverConnectionResponse)
+    protected function checkConnectionEstablished($serverConnectionResponse): void
     {
         $socksVersion = ord($serverConnectionResponse[0]);
         $responseCode = ord($serverConnectionResponse[1]);
 
-        if ($socksVersion != 0x05) {
+        if ($socksVersion !== 0x05) {
             throw new SocksException(SocksException::UNEXPECTED_PROTOCOL_VERSION, $socksVersion);
         }
-        if ($responseCode != 0x00) {
+        if ($responseCode !== 0x00) {
             throw new SocksException(SocksException::CONNECTION_NOT_ESTABLISHED, $responseCode);
         }
     }

@@ -181,7 +181,7 @@ class SocketAsync extends Socks5Socket implements Async
                 $socksGreetingConfig = $this->readSocksGreeting();
                 if ($socksGreetingConfig) {
                     $this->checkServerGreetedClient($socksGreetingConfig);
-                    if ($this->checkGreetngWithAuth($socksGreetingConfig)) {
+                    if ($this->checkGreetingWithAuth($socksGreetingConfig)) {
                         $this->writeSocksAuth();
                         $this->step->setStep(self::STATE_AUTH);
                     } else {

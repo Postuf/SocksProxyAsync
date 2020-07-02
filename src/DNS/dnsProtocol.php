@@ -5,6 +5,8 @@
 
 namespace SocksProxyAsync\DNS;
 
+use Exception;
+
 class dnsProtocol
 {
     public const STATE_OPEN = 0;
@@ -12,19 +14,12 @@ class dnsProtocol
     public const STATE_AWAITING_TCP = 2;
     public const STATE_PRE_READY = 3;
     public const STATE_READY = -1;
-
     public const DEFAULT_PORT = 53;
-
     public const ERROR_CLOSING_ON_DESTRUCT = 'closing on destruct';
+    private const DEFAULT_TIMEOUT = 60;
 
-    /** @var string */
-    private $header;
-    /** @var string */
-    private $rawHeader;
     /** @var string */
     private $rawBuffer;
-    /** @var string */
-    private $rawResponse;
 
     /** @var string|null */
     private $returnSize;
@@ -58,31 +53,24 @@ class dnsProtocol
     protected $types;
 
     /** @var resource|null */
-    private $socket = null;
-
-    /** @var array|null */
-    private $currentQuery = null;
+    private $socket;
 
     /** @var int */
     private $currentState = 0;
     /** @var float|null */
-    private $awaitingStarted = null;
+    private $awaitingStarted;
 
     /** @var callable|null */
     private $cb;
 
     /** @var string|null */
-    private $requestHeader = null;
+    private $requestHeader;
     /** @var int|null */
-    private $requestHeaderSize = null;
+    private $requestHeaderSize;
     /** @var int|null */
-    private $requestHeaderSizeBin = null;
-
-    const DEFAULT_TIMEOUT = 60;
+    private $requestHeaderSizeBin;
 
     /**
-     * dnsProtocol constructor.
-     *
      * @param bool $logging
      * @param int  $port
      * @param bool $udp
@@ -106,7 +94,7 @@ class dnsProtocol
             $this->showLog();
         }
 
-        if ($this->cb && $this->currentState != self::STATE_READY) {
+        if ($this->cb && $this->currentState !== self::STATE_READY) {
             $this->closeWithError(self::ERROR_CLOSING_ON_DESTRUCT);
         }
     }
@@ -121,7 +109,7 @@ class dnsProtocol
      *
      * @return bool
      */
-    public function error_handler($errno = 0, $errStr = null, $errFile = null, $errLine = null)
+    public function error_handler($errno = 0, $errStr = null, $errFile = null, $errLine = null): bool
     {
         // If error is suppressed with @, don't throw an exception
         if (error_reporting() === 0) {
@@ -134,7 +122,7 @@ class dnsProtocol
     public function clear(): void
     {
         $this->socket = null;
-        $this->currentQuery = null;
+        $currentQuery = null;
     }
 
     /**
@@ -249,7 +237,7 @@ class dnsProtocol
         }
 
         stream_set_blocking($this->socket, false);
-        list($header, $headersize, $headersizebin) = $this->prepareRequestHeaders($question, $type, $typeid);
+        [$header, $headersize, $headersizebin] = $this->prepareRequestHeaders($question, $type, $typeid);
 
         if (($this->udp) && ($headersize >= 512)) {
             @stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
@@ -274,7 +262,7 @@ class dnsProtocol
      *
      * @return dnsResponse
      */
-    public function Query($question, $type = 'A')
+    public function Query($question, $type = 'A'): dnsResponse
     {
         $typeid = $this->types->getByName($type);
         if ($typeid === false) {
@@ -290,7 +278,7 @@ class dnsProtocol
             throw new dnsException('Failed to open socket to '.$host);
         }
 
-        list($header, $headerSize, $headerSizeBin) = $this->prepareRequestHeaders($question, $type, $typeid);
+        [$header, $headerSize, $headerSizeBin] = $this->prepareRequestHeaders($question, $type, $typeid);
 
         if (($this->udp) && ($headerSize >= 512)) {
             stream_socket_shutdown($socket, STREAM_SHUT_RDWR);
@@ -351,12 +339,12 @@ class dnsProtocol
         return $this->prepareResponse();
     }
 
-    public function setServer($server)
+    public function setServer($server): void
     {
         $this->server = $server;
     }
 
-    public function getServer()
+    public function getServer(): string
     {
         return $this->server;
     }
@@ -366,12 +354,12 @@ class dnsProtocol
      *
      * @throws dnsException
      */
-    public function setTimeout($timeout = self::DEFAULT_TIMEOUT)
+    public function setTimeout(int $timeout = self::DEFAULT_TIMEOUT): void
     {
-        if (!$new_timeout = floatval($timeout) || $timeout < 0) {
+        if ($timeout < 0) {
             throw new dnsException('Incorrect timeout value: <'.$timeout.'>. Timeout must be positive number.');
         }
-        $this->timeout = $new_timeout;
+        $this->timeout = $timeout;
     }
 
     public function getTimeout()
@@ -379,22 +367,22 @@ class dnsProtocol
         return $this->timeout;
     }
 
-    public function setPort($port)
+    public function setPort($port): void
     {
         $this->port = $port;
     }
 
-    public function getPort()
+    public function getPort(): int
     {
         return $this->port;
     }
 
-    private function enableLogging()
+    private function enableLogging(): void
     {
         $this->logging = true;
     }
 
-    private function showLog()
+    private function showLog(): void
     {
         echo '==== LOG ====';
         foreach ($this->logEntries as $logentry) {
@@ -402,7 +390,7 @@ class dnsProtocol
         }
     }
 
-    private function writeLog($text)
+    private function writeLog($text): void
     {
         if ($this->logging) {
             $this->logEntries[] = '-----'.date('Y-m-d H:i:s').'-----'.$text.'-----';
@@ -417,7 +405,7 @@ class dnsProtocol
      *
      * @return string
      */
-    public function algorithm(int $code)
+    public function algorithm(int $code): ?string
     {
         switch ($code) {
             case 1:
@@ -451,14 +439,15 @@ class dnsProtocol
         }
     }
 
-    public function registrynameservers($tld)
+    public function registrynameservers($tld): array
     {
         $ns = new dnsNameserver();
 
         return $ns->getNs($tld);
     }
 
-    public function base32encode($input, $padding = true)
+    /** @noinspection TypeUnsafeComparisonInspection */
+    public function base32encode($input, $padding = true): string
     {
         $map = [
             '0', '1', '2', '3', '4', '5', '6', '7', //  7
@@ -473,8 +462,8 @@ class dnsProtocol
         }
         $input = str_split($input);
         $binaryString = '';
-        for ($i = 0; $i < count($input); $i++) {
-            $binaryString .= str_pad(base_convert(ord($input[$i]), 10, 2), 8, '0', STR_PAD_LEFT);
+        foreach ($input as $iValue) {
+            $binaryString .= str_pad(base_convert(ord($iValue), 10, 2), 8, '0', STR_PAD_LEFT);
         }
         $fiveBitBinaryArray = str_split($binaryString, 5);
         $base32 = '';
@@ -499,10 +488,10 @@ class dnsProtocol
     }
 
     /** @noinspection PhpUnused */
-    public function nsec3hash($qname, $salt = null, $iterations = '-')
+    public function nsec3hash($qname, $salt = null, $iterations = '-'): string
     {
         $salt = pack('H*', $salt);
-        $iterations = intval($iterations);
+        $iterationsCount = (int) $iterations;
         $toHash = '';
 
         $qparts = explode('.', strtolower($qname).'.');
@@ -513,8 +502,8 @@ class dnsProtocol
         do {
             $toHash .= $salt;
             $toHash = sha1($toHash, true);
-            $iterations--;
-        } while ($iterations >= 0);
+            $iterationsCount--;
+        } while ($iterationsCount >= 0);
 
         return $this->base32encode($toHash);
     }
@@ -559,6 +548,7 @@ class dnsProtocol
      * @param int    $typeid
      *
      * @return array
+     * @noinspection TypeUnsafeComparisonInspection
      */
     protected function prepareRequestHeaders(string $question, string $type, int $typeid): array
     {
@@ -575,16 +565,20 @@ class dnsProtocol
             $labels = explode('.', $question);
         }
         $question_binary = '';
-        for ($a = 0; $a < count($labels); $a++) {
-            $size = strlen($labels[$a]);
+        foreach ($labels as $aValue) {
+            $size = strlen($aValue);
             $question_binary .= pack('C', $size); // size byte first
-            $question_binary .= $labels[$a]; // then the label
+            $question_binary .= $aValue; // then the label
         }
         $question_binary .= pack('C', 0); // end it off
 
         $this->writeLog('Question: '.$question.' (type='.$type.'/'.$typeid.')');
 
-        $id = rand(1, 255) | (rand(0, 255) << 8);    // generate the ID
+        try {
+            $id = random_int(1, 255) | (random_int(0, 255) << 8);
+        } catch (Exception $e) {
+            $id = 0;
+        } // generate the ID
 
         // Set standard codes and flags
         $flags = (0x0100 & 0x0300) | 0x0020; // recursion & queryspecmask | authenticated data
@@ -611,13 +605,13 @@ class dnsProtocol
      * @throws dnsException
      *
      * @return dnsResponse
+     * @noinspection TypeUnsafeComparisonInspection
      */
     protected function prepareResponse(): dnsResponse
     {
-        $this->rawHeader = substr($this->rawBuffer, 0, 12); // first 12 bytes is the header
-        $this->rawResponse = substr($this->rawBuffer, 12); // after that the response
-        $this->header = unpack('nid/nflags/nqdcount/nancount/nnscount/narcount', $this->rawHeader);
-        $flags = sprintf("%016b\n", $this->header['flags']);
+        $rawHeader = substr($this->rawBuffer, 0, 12); // first 12 bytes is the header
+        $header = unpack('nid/nflags/nqdcount/nancount/nnscount/narcount', $rawHeader);
+        $flags = sprintf("%016b\n", $header['flags']);
         $response = new dnsResponse();
 
         $response->setAuthorative($flags[5] == '1');
@@ -626,18 +620,18 @@ class dnsProtocol
         $response->setRecursionAvailable($flags[8] == '1');
         $response->setAuthenticated($flags[10] == '1');
         $response->setDnssecAware($flags[11] == '1');
-        $response->setAnswerCount($this->header['ancount']);
+        $response->setAnswerCount($header['ancount']);
 
-        $this->writeLog('Query returned '.$this->header['ancount'].' Answers');
+        $this->writeLog('Query returned '.$header['ancount'].' Answers');
 
         // Deal with the header question data
-        if ($this->header['qdcount'] > 0) {
-            $response->setQueryCount($this->header['qdcount']);
-            $this->writeLog('Found '.$this->header['qdcount'].' questions');
+        if ($header['qdcount'] > 0) {
+            $response->setQueryCount($header['qdcount']);
+            $this->writeLog('Found '.$header['qdcount'].' questions');
             $q = '';
-            for ($a = 0; $a < $this->header['qdcount']; $a++) {
+            for ($a = 0; $a < $header['qdcount']; $a++) {
                 $c = 1;
-                while ($c != 0) {
+                while ($c !== 0) {
                     $c = hexdec(bin2hex($response->ReadResponse($this->rawBuffer, 1)));
                     $q .= $c;
                 }
@@ -646,20 +640,20 @@ class dnsProtocol
             }
         }
 
-        $this->writeLog('Found '.$this->header['ancount'].' answer records');
-        $response->setResourceResultCount((int) $this->header['ancount']);
-        for ($a = 0; $a < $this->header['ancount']; $a++) {
+        $this->writeLog('Found '.$header['ancount'].' answer records');
+        $response->setResourceResultCount((int) $header['ancount']);
+        for ($a = 0; $a < $header['ancount']; $a++) {
             $response->ReadRecord($this->rawBuffer, dnsResponse::RESULTTYPE_RESOURCE);
         }
 
-        $this->writeLog('Found '.$this->header['nscount'].' authorative records');
-        $response->setNameserverResultCount((int) $this->header['nscount']);
-        for ($a = 0; $a < $this->header['nscount']; $a++) {
+        $this->writeLog('Found '.$header['nscount'].' authorative records');
+        $response->setNameserverResultCount((int) $header['nscount']);
+        for ($a = 0; $a < $header['nscount']; $a++) {
             $response->ReadRecord($this->rawBuffer, dnsResponse::RESULTTYPE_NAMESERVER);
         }
-        $response->setAdditionalResultCount((int) $this->header['arcount']);
-        $this->writeLog('Found '.$this->header['arcount'].' additional records');
-        for ($a = 0; $a < $this->header['arcount']; $a++) {
+        $response->setAdditionalResultCount((int) $header['arcount']);
+        $this->writeLog('Found '.$header['arcount'].' additional records');
+        for ($a = 0; $a < $header['arcount']; $a++) {
             $response->ReadRecord($this->rawBuffer, dnsResponse::RESULTTYPE_ADDITIONAL);
         }
 

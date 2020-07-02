@@ -24,7 +24,7 @@ class DnsTest extends TestCase
         foreach ($result->getResourceResults() as $resource) {
             if ($resource instanceof dnsAresult) {
                 $found = true;
-                $this->assertEquals($question, $resource->getDomain());
+                $this->assertEquals($question, strtolower($resource->getDomain()));
             }
         }
         $this->assertEquals(true, $found);
@@ -36,7 +36,7 @@ class DnsTest extends TestCase
         foreach ($result->getResourceResults() as $resource) {
             if ($resource instanceof dnsMXresult) {
                 $found = true;
-                $this->assertEquals($question, $resource->getDomain());
+                $this->assertEquals($question, strtolower($resource->getDomain()));
             }
         }
 

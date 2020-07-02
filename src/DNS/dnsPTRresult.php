@@ -1,5 +1,7 @@
 <?php
 
+/** @noinspection SpellCheckingInspection */
+
 namespace SocksProxyAsync\DNS;
 
 class dnsPTRresult extends dnsResult
@@ -12,7 +14,7 @@ class dnsPTRresult extends dnsResult
         $this->setData($data);
     }
 
-    public function setData($data)
+    public function setData($data): void
     {
         $this->data = $data;
     }

@@ -782,7 +782,7 @@ class dnsNameserver
         'zw'    => ['ns1.telone.co.zw.', 'ns2.gip.net.', 'ns2.telone.co.zw.', 'ns3.telone.co.zw.'],
     ];
 
-    public function getNs($tld)
+    public function getNs($tld): array
     {
         return $this->ns[$tld];
     }

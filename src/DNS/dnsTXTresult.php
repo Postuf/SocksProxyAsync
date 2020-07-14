@@ -12,7 +12,7 @@ class dnsTXTresult extends dnsResult
         $this->setRecord($record);
     }
 
-    public function setRecord($record)
+    public function setRecord($record): void
     {
         $this->record = $record;
     }

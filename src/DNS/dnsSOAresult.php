@@ -12,7 +12,7 @@ class dnsSOAresult extends dnsResult
     private $retry;
     private $minttl;
 
-    public function setSerial($serial)
+    public function setSerial($serial): void
     {
         $this->serial = $serial;
     }
@@ -22,7 +22,7 @@ class dnsSOAresult extends dnsResult
         return $this->serial;
     }
 
-    public function setExpiry($expiry)
+    public function setExpiry($expiry): void
     {
         $this->expiry = $expiry;
     }
@@ -32,7 +32,7 @@ class dnsSOAresult extends dnsResult
         return $this->expiry;
     }
 
-    public function setRetry($retry)
+    public function setRetry($retry): void
     {
         $this->retry = $retry;
     }
@@ -42,7 +42,7 @@ class dnsSOAresult extends dnsResult
         return $this->retry;
     }
 
-    public function setMinttl($minttl)
+    public function setMinttl($minttl): void
     {
         $this->minttl = $minttl;
     }
@@ -52,7 +52,7 @@ class dnsSOAresult extends dnsResult
         return $this->minttl;
     }
 
-    public function setRefresh($refresh)
+    public function setRefresh($refresh): void
     {
         $this->refresh = $refresh;
     }
@@ -62,7 +62,7 @@ class dnsSOAresult extends dnsResult
         return $this->refresh;
     }
 
-    public function setResponsible($name)
+    public function setResponsible($name): void
     {
         $dot = strpos($name, '.');
         $name[$dot] = '@';
@@ -74,7 +74,7 @@ class dnsSOAresult extends dnsResult
         return $this->responsible;
     }
 
-    public function setNameserver($data)
+    public function setNameserver($data): void
     {
         $this->nameserver = $data;
     }

@@ -20,7 +20,7 @@ class dnsDSresult extends dnsResult
         $this->setRest($rest);
     }
 
-    public function setKeytag($keytag)
+    public function setKeytag($keytag): void
     {
         $this->keytag = $keytag;
     }
@@ -30,7 +30,7 @@ class dnsDSresult extends dnsResult
         return $this->keytag;
     }
 
-    public function setAlgorithm($algorithm)
+    public function setAlgorithm($algorithm): void
     {
         $this->algorithm = $algorithm;
     }
@@ -40,7 +40,7 @@ class dnsDSresult extends dnsResult
         return $this->algorithm;
     }
 
-    public function setDigest($digest)
+    public function setDigest($digest): void
     {
         $this->digest = $digest;
     }
@@ -50,7 +50,7 @@ class dnsDSresult extends dnsResult
         return $this->digest;
     }
 
-    public function setKey($key)
+    public function setKey($key): void
     {
         $this->key = $key;
     }
@@ -60,7 +60,7 @@ class dnsDSresult extends dnsResult
         return $this->key;
     }
 
-    public function setRest($rest)
+    public function setRest($rest): void
     {
         $this->rest = $rest;
     }

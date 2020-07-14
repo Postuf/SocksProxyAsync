@@ -1,5 +1,6 @@
 <?php
 
+/** @noinspection PhpUnused */
 /** @noinspection SpellCheckingInspection */
 
 namespace SocksProxyAsync\DNS;
@@ -38,7 +39,6 @@ class dnsRRSIGresult extends dnsResult
     public function __construct($type, $algorithm, $labels, $originalttl, $expiration, $inception, $keytag)
     {
         parent::__construct();
-        date_default_timezone_set('UTC');
         $types = new DNSTypes();
         $this->setTypecovered($types->getById($type));
         $this->setAlgorithm($algorithm);
@@ -51,7 +51,7 @@ class dnsRRSIGresult extends dnsResult
         $this->setKeytag($keytag);
     }
 
-    public function setExpirationTimestamp($timestamp)
+    public function setExpirationTimestamp($timestamp): void
     {
         $this->expirationtimestamp = $timestamp;
     }
@@ -61,7 +61,7 @@ class dnsRRSIGresult extends dnsResult
         return $this->expirationtimestamp;
     }
 
-    public function setInceptionTimestamp($timestamp)
+    public function setInceptionTimestamp($timestamp): void
     {
         $this->inceptiontimestamp = $timestamp;
     }
@@ -71,7 +71,7 @@ class dnsRRSIGresult extends dnsResult
         return $this->inceptiontimestamp;
     }
 
-    public function setSignature($sig)
+    public function setSignature($sig): void
     {
         $this->signature = $sig;
     }
@@ -81,7 +81,7 @@ class dnsRRSIGresult extends dnsResult
         return $this->signature;
     }
 
-    public function setSignatureBase64($sig)
+    public function setSignatureBase64($sig): void
     {
         $this->signaturebase64 = $sig;
     }
@@ -91,7 +91,7 @@ class dnsRRSIGresult extends dnsResult
         return $this->signaturebase64;
     }
 
-    public function setSignername($name)
+    public function setSignername($name): void
     {
         $this->signername = $name;
     }
@@ -101,7 +101,7 @@ class dnsRRSIGresult extends dnsResult
         return $this->signername;
     }
 
-    public function setTypecovered($type)
+    public function setTypecovered($type): void
     {
         $this->typecovered = $type;
     }
@@ -111,7 +111,7 @@ class dnsRRSIGresult extends dnsResult
         return $this->typecovered;
     }
 
-    public function setAlgorithm($algorithm)
+    public function setAlgorithm($algorithm): void
     {
         $this->algorithm = $algorithm;
     }
@@ -121,7 +121,7 @@ class dnsRRSIGresult extends dnsResult
         return $this->algorithm;
     }
 
-    public function setLabels($labels)
+    public function setLabels($labels): void
     {
         $this->labels = $labels;
     }
@@ -131,7 +131,7 @@ class dnsRRSIGresult extends dnsResult
         return $this->labels;
     }
 
-    public function setExpirationDate($expiration)
+    public function setExpirationDate($expiration): void
     {
         $this->expirationdate = $expiration;
     }
@@ -141,7 +141,7 @@ class dnsRRSIGresult extends dnsResult
         return $this->expirationdate;
     }
 
-    public function setInceptionDate($inception)
+    public function setInceptionDate($inception): void
     {
         $this->inceptiondate = $inception;
     }
@@ -151,7 +151,7 @@ class dnsRRSIGresult extends dnsResult
         return $this->inceptiondate;
     }
 
-    public function setOriginalTTL($ttl)
+    public function setOriginalTTL($ttl): void
     {
         $this->originalttl = $ttl;
     }
@@ -161,7 +161,7 @@ class dnsRRSIGresult extends dnsResult
         return $this->originalttl;
     }
 
-    public function setKeytag($keytag)
+    public function setKeytag($keytag): void
     {
         $this->keytag = $keytag;
     }
@@ -171,7 +171,7 @@ class dnsRRSIGresult extends dnsResult
         return $this->keytag;
     }
 
-    public function setPublicKey($key)
+    public function setPublicKey($key): void
     {
         $this->publickey = $key;
     }

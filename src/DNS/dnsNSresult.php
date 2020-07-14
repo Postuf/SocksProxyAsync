@@ -21,7 +21,7 @@ class dnsNSresult extends dnsResult
     /**
      * @param string $server
      */
-    public function setNameserver($server)
+    public function setNameserver($server): void
     {
         $this->nameserver = $server;
     }
@@ -30,7 +30,7 @@ class dnsNSresult extends dnsResult
      * @return string
      * @noinspection PhpUnused
      */
-    public function getNameserver()
+    public function getNameserver(): string
     {
         return $this->nameserver;
     }

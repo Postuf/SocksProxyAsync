@@ -14,8 +14,8 @@ use SocksProxyAsync\SocksException;
 class SocketAsyncTest extends TestCase
 {
     /** @see node subdir */
-    private const HOST = '127.0.0.1';
     private const HOSTNAME = 'localhost';
+    private const HOST = '127.0.0.1';
     private const PORT = '8080';
     private const PROXY = '127.0.0.1:1080';
     private const PROXY_HOSTNAME = 'localhost:1080';

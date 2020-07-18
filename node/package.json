@@ -2,6 +2,7 @@
   "dependencies": {
     "cli": "^1.0.1",
     "http-server": "^0.12.3",
-    "socksv5": "0.0.6"
+    "socksv5": "0.0.6",
+    "lodash": ">=4.17.19"
   }
 }

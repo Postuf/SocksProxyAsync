@@ -11,9 +11,9 @@ namespace SocksProxyAsync\DNS;
 class dnsTypes
 {
     /** @var string[] */
-    public static $typesById = [];
+    public static array $typesById = [];
     /** @var int[] */
-    public static $typesByName = [];
+    public static array $typesByName = [];
 
     private static function addType(int $id, string $name): void
     {

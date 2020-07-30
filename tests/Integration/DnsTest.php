@@ -24,10 +24,10 @@ class DnsTest extends TestCase
         foreach ($result->getResourceResults() as $resource) {
             if ($resource instanceof dnsAresult) {
                 $found = true;
-                $this->assertEquals($question, strtolower($resource->getDomain()));
+                self::assertEquals($question, strtolower($resource->getDomain()));
             }
         }
-        $this->assertEquals(true, $found);
+        self::assertEquals(true, $found);
 
         /** @noinspection PhpUnhandledExceptionInspection */
         $result = $dns->Query($question, 'MX');
@@ -36,10 +36,10 @@ class DnsTest extends TestCase
         foreach ($result->getResourceResults() as $resource) {
             if ($resource instanceof dnsMXresult) {
                 $found = true;
-                $this->assertEquals($question, strtolower($resource->getDomain()));
+                self::assertEquals($question, strtolower($resource->getDomain()));
             }
         }
 
-        $this->assertEquals(true, $found);
+        self::assertEquals(true, $found);
     }
 }

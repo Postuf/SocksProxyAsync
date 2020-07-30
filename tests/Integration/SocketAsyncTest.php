@@ -16,15 +16,13 @@ class SocketAsyncTest extends TestCase
     /** @see node subdir */
     private const HOSTNAME = 'localhost';
     private const HOST = '127.0.0.1';
-    private const PORT = '8080';
+    private const PORT = 8080;
     private const PROXY = '127.0.0.1:1080';
     private const PROXY_HOSTNAME = 'localhost:1080';
     private const DEFAULT_DNS_FOR_TEST = '127.0.0.1:9999';
 
-    /** @var SocketAsync */
-    private $socket;
-    /** @var Proxy */
-    private $proxy;
+    private SocketAsync $socket;
+    private Proxy $proxy;
 
     protected function setUp(): void
     {
@@ -43,15 +41,15 @@ class SocketAsyncTest extends TestCase
             Constants::DEFAULT_TIMEOUT,
             self::DEFAULT_DNS_FOR_TEST
         );
-        $this->assertEquals(self::HOST, $this->socket->getHost());
+        self::assertEquals(self::HOST, $this->socket->getHost());
 
         while (!$socket->ready()) {
             /** @noinspection PhpUnhandledExceptionInspection */
             $socket->poll();
         }
 
-        $this->assertEquals('127.0.0.1', $proxy->getServer());
-        $this->assertEquals(self::HOST, $socket->getHost());
+        self::assertEquals('127.0.0.1', $proxy->getServer());
+        self::assertEquals(self::HOST, $socket->getHost());
     }
 
     public function test_async_socket_ip_with_default_dns(): void
@@ -63,15 +61,15 @@ class SocketAsyncTest extends TestCase
             self::PORT,
             Constants::DEFAULT_TIMEOUT
         );
-        $this->assertEquals(self::HOST, $this->socket->getHost());
+        self::assertEquals(self::HOST, $this->socket->getHost());
 
         while (!$socket->ready()) {
             /** @noinspection PhpUnhandledExceptionInspection */
             $socket->poll();
         }
 
-        $this->assertEquals('127.0.0.1', $proxy->getServer());
-        $this->assertEquals(self::HOST, $socket->getHost());
+        self::assertEquals('127.0.0.1', $proxy->getServer());
+        self::assertEquals(self::HOST, $socket->getHost());
     }
 
     public function test_async_socket_name(): void
@@ -84,15 +82,15 @@ class SocketAsyncTest extends TestCase
             Constants::DEFAULT_TIMEOUT,
             self::DEFAULT_DNS_FOR_TEST
         );
-        $this->assertEquals(self::HOST, $this->socket->getHost());
+        self::assertEquals(self::HOST, $this->socket->getHost());
 
         while (!$socket->ready()) {
             /** @noinspection PhpUnhandledExceptionInspection */
             $socket->poll();
         }
 
-        $this->assertEquals('127.0.0.1', $proxy->getServer());
-        $this->assertEquals(self::HOST, $socket->getHost());
+        self::assertEquals('127.0.0.1', $proxy->getServer());
+        self::assertEquals(self::HOST, $socket->getHost());
     }
 
     /**
@@ -103,7 +101,7 @@ class SocketAsyncTest extends TestCase
         $this->proxy = new Proxy(static::PROXY_HOSTNAME);
         for ($i = 0; $i < 2; $i++) {
             $this->socket = new SocketAsync($this->proxy, self::HOSTNAME, self::PORT);
-            $this->assertEquals(self::HOSTNAME, $this->socket->getHost());
+            self::assertEquals(self::HOSTNAME, $this->socket->getHost());
 
             while (!$this->socket->ready()) {
                 $this->socket->poll();
@@ -114,7 +112,7 @@ class SocketAsyncTest extends TestCase
             $data = "GET /test{$br}Host: 127.0.0.1:8080{$br}Accept: identity{$br}{$br}";
 
             $writtenBytes = $this->socket->write($data);
-            $this->assertEquals($writtenBytes, strlen($data));
+            self::assertEquals($writtenBytes, strlen($data));
             usleep(2000000);
             $response = $this->socket->read(4096);
             $lines = explode("\n", trim($response));
@@ -126,7 +124,7 @@ class SocketAsyncTest extends TestCase
             $lines = array_values($lines);
             $lastLine = $lines[count($lines) - 1];
             /* @see node/http/test */
-            $this->assertEquals('test', $lastLine);
+            self::assertEquals('test', $lastLine);
             $this->socket->stop();
             unset($this->socket);
         }
@@ -137,7 +135,7 @@ class SocketAsyncTest extends TestCase
      */
     public function test_socket_works_with_ip(): void
     {
-        $this->assertEquals(self::HOST, $this->socket->getHost());
+        self::assertEquals(self::HOST, $this->socket->getHost());
 
         while (!$this->socket->ready()) {
             $this->socket->poll();
@@ -148,7 +146,7 @@ class SocketAsyncTest extends TestCase
         $data = "GET /test{$br}Host: 127.0.0.1:8080{$br}Accept: identity{$br}{$br}";
 
         $writtenBytes = $this->socket->write($data);
-        $this->assertEquals($writtenBytes, strlen($data));
+        self::assertEquals($writtenBytes, strlen($data));
         usleep(2000000);
         $response = $this->socket->read(4096);
         $lines = explode("\n", trim($response));
@@ -160,7 +158,7 @@ class SocketAsyncTest extends TestCase
         $lines = array_values($lines);
         $lastLine = $lines[count($lines) - 1];
         /* @see node/http/test */
-        $this->assertEquals('test', $lastLine);
+        self::assertEquals('test', $lastLine);
         $this->socket->stop();
     }
 
@@ -179,7 +177,7 @@ class SocketAsyncTest extends TestCase
                 $ready = true;
             }
         );
-        $this->assertEquals(self::HOST, $socket->getHost());
+        self::assertEquals(self::HOST, $socket->getHost());
 
         while (!$ready) {
             $socket->poll();
@@ -190,7 +188,7 @@ class SocketAsyncTest extends TestCase
         $data = "GET /test{$br}Host: 127.0.0.1:8080{$br}Accept: identity{$br}{$br}";
 
         $writtenBytes = $socket->write($data);
-        $this->assertEquals($writtenBytes, strlen($data));
+        self::assertEquals($writtenBytes, strlen($data));
         usleep(2000000);
         $response = $socket->read(4096);
         $lines = explode("\n", trim($response));
@@ -202,7 +200,7 @@ class SocketAsyncTest extends TestCase
         $lines = array_values($lines);
         $lastLine = $lines[count($lines) - 1];
         /* @see node/http/test */
-        $this->assertEquals('test', $lastLine);
+        self::assertEquals('test', $lastLine);
         $socket->stop();
     }
 

@@ -12,30 +12,26 @@ class dnsResponse
     public const RESULTTYPE_NAMESERVER = 'nameserver';
     public const RESULTTYPE_ADDITIONAL = 'additional';
 
-    /** @var int */
-    protected $responsecounter;
+    protected int $responsecounter;
     /** @var dnsResult[] */
-    protected $resourceResults;
+    protected array $resourceResults;
     /** @var dnsResult[] */
-    protected $nameserverResults;
+    protected array $nameserverResults;
     /** @var dnsResult[] */
-    protected $additionalResults;
-    /** @var int */
-    protected $resourceResponses;
-    /** @var int */
-    protected $nameserverResponses;
-    /** @var int */
-    protected $additionalResponses;
+    protected array $additionalResults;
+    protected int $resourceResponses;
+    protected int $nameserverResponses;
+    protected int $additionalResponses;
     /** @var array */
-    protected $queries;
-    private $questions;
-    private $answers;
-    private $authorative;
-    private $truncated;
-    private $recursionRequested;
-    private $recursionAvailable;
-    private $authenticated;
-    private $dnssecAware;
+    protected array $queries;
+    private int $questions;
+    private int $answers;
+    private bool $authorative;
+    private bool $truncated;
+    private bool $recursionRequested;
+    private bool $recursionAvailable;
+    private bool $authenticated;
+    private bool $dnssecAware;
 
     public function __construct()
     {
@@ -79,22 +75,22 @@ class dnsResponse
         return $this->queries;
     }
 
-    public function setAnswerCount($count): void
+    public function setAnswerCount(int $count): void
     {
         $this->answers = $count;
     }
 
-    public function getAnswerCount()
+    public function getAnswerCount(): int
     {
         return $this->answers;
     }
 
-    public function setQueryCount($count): void
+    public function setQueryCount(int $count): void
     {
         $this->questions = $count;
     }
 
-    public function getQueryCount()
+    public function getQueryCount(): int
     {
         return $this->questions;
     }
@@ -199,8 +195,7 @@ class dnsResponse
         $domain = $this->ReadDomainLabel($buffer);
         $ans_header_bin = $this->ReadResponse($buffer, 10); // 10 byte header
         $ans_header = unpack('ntype/nclass/Nttl/nlength', $ans_header_bin);
-        $types = new DNSTypes();
-        $typeId = $types->getById((int) $ans_header['type']);
+        $typeId = (new DNSTypes())->getById((int) $ans_header['type']);
         switch ($typeId) {
             case 'A':
                 $result = new dnsAresult(implode('.', unpack('Ca/Cb/Cc/Cd', $this->ReadResponse($buffer, 4))));
@@ -290,7 +285,7 @@ class dnsResponse
         $result->setType($ans_header['type']);
         $result->setTypeId($typeId);
         $result->setClass($ans_header['class']);
-        $result->setTtl($ans_header['ttl']);
+        $result->setTtl((int) $ans_header['ttl']);
         $this->addResult($result, $resulttype);
     }
 
@@ -345,8 +340,7 @@ class dnsResponse
                 $nextitem = $this->ReadResponse($buffer, 1, $offset++);
                 $pointer_offset = (($label_len & 0x3f) << 8) + ord($nextitem);
                 // Branch Back Upon Ourselves...
-                $pointer_labels = $this->ReadDomainLabels($buffer, $pointer_offset);
-                foreach ($pointer_labels as $ptr_label) {
+                foreach ($this->ReadDomainLabels($buffer, $pointer_offset) as $ptr_label) {
                     $labels[] = $ptr_label;
                 }
                 $return = true;

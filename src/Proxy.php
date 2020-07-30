@@ -14,12 +14,12 @@ class Proxy
     /** @var string */
     private $port;
     /** @var int */
-    private $type;
+    private int $type;
 
     /** @var string|null */
-    private $password;
+    private ?string $password = null;
     /** @var string|null */
-    private $login;
+    private ?string $login = null;
 
     /**
      * Proxy formats:

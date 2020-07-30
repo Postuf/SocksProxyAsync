@@ -13,27 +13,27 @@ class ProxyTest extends TestCase
     public function test_it_creates(): void
     {
         $proxy = new Proxy('1.2.3.4:80');
-        $this->assertEquals(80, $proxy->getPort());
-        $this->assertEquals('1.2.3.4', $proxy->getServer());
-        $this->assertEquals(null, $proxy->getLogin());
-        $this->assertEquals(null, $proxy->getPassword());
+        self::assertEquals(80, $proxy->getPort());
+        self::assertEquals('1.2.3.4', $proxy->getServer());
+        self::assertEquals(null, $proxy->getLogin());
+        self::assertEquals(null, $proxy->getPassword());
     }
 
     public function test_it_sets_server(): void
     {
         $proxy = new Proxy('1.2.3.4:80');
         $proxy->setServer('1.2.3.5');
-        $this->assertEquals('1.2.3.5', $proxy->getServer());
+        self::assertEquals('1.2.3.5', $proxy->getServer());
     }
 
     public function test_it_creates_with_login_pw(): void
     {
         $proxy = new Proxy('1.2.3.4:80|a:b');
-        $this->assertEquals(80, $proxy->getPort());
-        $this->assertEquals('1.2.3.4', $proxy->getServer());
-        $this->assertEquals('a', $proxy->getLogin());
-        $this->assertEquals('b', $proxy->getPassword());
-        $this->assertEquals(true, $proxy->isNeedAuth());
+        self::assertEquals(80, $proxy->getPort());
+        self::assertEquals('1.2.3.4', $proxy->getServer());
+        self::assertEquals('a', $proxy->getLogin());
+        self::assertEquals('b', $proxy->getPassword());
+        self::assertEquals(true, $proxy->isNeedAuth());
     }
 
     /**

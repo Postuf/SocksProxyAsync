@@ -31,27 +31,24 @@ class SocketAsync extends Socks5Socket implements Async
     private const ADDRESS_TYPE_A = 'A';
     private const DNS_TTL_SEC = 300;
 
-    /**
-     * @var AsyncStep
-     */
-    protected $step;
+    protected AsyncStep $step;
 
     /** @var bool */
-    protected $isReady;
+    protected bool $isReady;
 
     /** @var dnsProtocol */
-    protected $resolver;
+    protected dnsProtocol $resolver;
 
     /** @var bool */
-    protected $resolveCallbackSet = false;
+    protected bool $resolveCallbackSet = false;
     /** @var bool */
-    protected $nameReady = false;
+    protected bool $nameReady = false;
     /** @var string|null */
-    private $dnsHostAndPort;
+    private ?string $dnsHostAndPort;
     /**
      * @var array[] name -> ['ipv4', time()]
      */
-    protected static $dnsCache = [];
+    protected static array $dnsCache = [];
 
     /**
      * @param Proxy  $proxy
@@ -62,8 +59,8 @@ class SocketAsync extends Socks5Socket implements Async
      */
     public function __construct(
         Proxy $proxy,
-        $host,
-        $port,
+        string $host,
+        int $port,
         int $timeOutSeconds = Constants::SOCKET_CONNECT_TIMEOUT_SEC,
         ?string $dnsHostAndPort = null
     ) {
@@ -102,17 +99,15 @@ class SocketAsync extends Socks5Socket implements Async
 
     private function getSystemDnsHost(): ?string
     {
-        if (!file_exists(self::ETC_RESOLV_CONF)) {
+        if (!is_file(self::ETC_RESOLV_CONF)) {
             return null;
         }
 
         $contents = file_get_contents(self::ETC_RESOLV_CONF);
-        $lines = explode("\n", $contents);
-        foreach ($lines as $line) {
+        foreach (explode("\n", $contents) as $line) {
             $line = trim($line);
             if (strpos($line, '#') !== false) {
-                $line = substr($line, 0, strpos($line, '#'));
-                $line = trim($line);
+                $line = trim(substr($line, 0, strpos($line, '#')));
             }
             if (strpos($line, 'nameserver ') !== false) {
                 $line = str_replace('nameserver ', '', $line);

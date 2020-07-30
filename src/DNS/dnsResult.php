@@ -10,12 +10,12 @@ class dnsResult
     private $class;
     private $data;
     private $domain;
-    private $record;
+    private string $record;
     /**
      * @var string|null
      */
-    private $typeId;
-    private $ttl;
+    private ?string $typeId;
+    private int $ttl;
 
     public function __construct()
     {
@@ -51,22 +51,22 @@ class dnsResult
         $this->class = $class;
     }
 
-    public function setTtl($ttl): void
+    public function setTtl(int $ttl): void
     {
         $this->ttl = $ttl;
     }
 
-    public function getTtl()
+    public function getTtl(): int
     {
         return $this->ttl;
     }
 
-    public function getData()
+    public function getData(): string
     {
         return $this->data;
     }
 
-    public function setData($data): void
+    public function setData(string $data): void
     {
         $this->data = $data;
     }
@@ -81,12 +81,12 @@ class dnsResult
         $this->domain = $domain;
     }
 
-    public function getRecord()
+    public function getRecord(): string
     {
         return $this->record;
     }
 
-    public function setRecord($record): void
+    public function setRecord(string $record): void
     {
         $this->record = $record;
     }

@@ -4,20 +4,20 @@ namespace SocksProxyAsync\DNS;
 
 class dnsTXTresult extends dnsResult
 {
-    private $record;
+    private string $record;
 
-    public function __construct($record)
+    public function __construct(string $record)
     {
         parent::__construct();
         $this->setRecord($record);
     }
 
-    public function setRecord($record): void
+    public function setRecord(string $record): void
     {
         $this->record = $record;
     }
 
-    public function getRecord()
+    public function getRecord(): string
     {
         return $this->record;
     }

@@ -15,8 +15,7 @@ class ProxySocketTest extends TestCase
     private const HOST = '127.0.0.1';
     private const PORT = '8080';
 
-    /** @var Socks5Socket */
-    private $socket;
+    private Socks5Socket $socket;
 
     protected function setUp(): void
     {

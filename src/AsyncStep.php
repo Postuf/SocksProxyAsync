@@ -9,38 +9,17 @@ use RuntimeException;
 
 class AsyncStep
 {
-    /**
-     * @var int
-     */
-    private $step = 0;
-    /**
-     * @var int
-     */
-    private $stepTries = 0;
-    /**
-     * @var float
-     */
-    private $stepDuration = 0.0;
-    /**
-     * @var int
-     */
-    private $stepStart = 0;
-    /**
-     * @var string
-     */
-    private $stepName;
+    private int $step = 0;
+    private int $stepTries = 0;
+    private float $stepDuration = 0.0;
+    private float $stepStart = 0.0;
+    private string $stepName;
+    private bool $neverRun = true;
     /**
      * @var int
      */
     private $criticalTimeSeconds;
-    /**
-     * @var bool
-     */
-    private $finished = false;
-    /**
-     * @var bool
-     */
-    private $neverRun = true;
+    private bool $finished = false;
 
     public function __construct(string $stepName, float $criticalTimeSeconds = Constants::ASYNC_STEP_MAX_SEC)
     {

@@ -20,19 +20,10 @@ class Socks5Socket
      *
      * @var string
      */
-    protected $host;
-    /**
-     * @var int
-     */
-    protected $port;
-    /**
-     * @var Proxy
-     */
-    protected $proxy;
-    /**
-     * @var int
-     */
-    protected $timeoutSeconds;
+    protected string $host;
+    protected int $port;
+    protected Proxy $proxy;
+    protected int $timeoutSeconds;
 
     /**
      * @param Proxy $proxy
@@ -84,6 +75,7 @@ class Socks5Socket
         $this->checkServerGreetedClient($socksGreetingConfig);
         if ($this->checkGreetingWithAuth($socksGreetingConfig)) {
             $this->writeSocksAuth();
+            /** @noinspection UnusedFunctionResultInspection */
             $this->readSocksAuthStatus();
         }
         $this->connectSocksSocket();

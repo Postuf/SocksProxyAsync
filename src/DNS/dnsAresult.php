@@ -11,7 +11,7 @@ namespace SocksProxyAsync\DNS;
 class dnsAresult extends dnsResult
 {
     /** @var string */
-    private $ipv4;
+    private string $ipv4;
 
     public function __construct(string $ip)
     {

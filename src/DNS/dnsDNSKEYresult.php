@@ -7,8 +7,8 @@ class dnsDNSKEYresult extends dnsResult
     private $flags;
     private $algorithm;
     private $protocol;
-    private $sep;
-    private $zonekey;
+    private bool $sep;
+    private bool $zonekey;
     private $keylength;
     private $publickey;
     private $publickeybase64;

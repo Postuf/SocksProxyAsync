@@ -12,7 +12,7 @@ class SocketAsyncCallback extends SocketAsync
     private $callback;
 
     /** @var bool */
-    private $called = false;
+    private bool $called = false;
 
     /**
      * SocketAsyncCallback constructor.

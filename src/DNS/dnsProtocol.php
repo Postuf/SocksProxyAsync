@@ -19,26 +19,20 @@ class dnsProtocol
     private const DEFAULT_TIMEOUT = 60;
 
     /** @var string */
-    private $rawBuffer;
+    private string $rawBuffer;
 
     /** @var string|null */
-    private $returnSize;
+    private ?string $returnSize;
     /**
      * @var bool
      */
-    protected $logging;
-    /**
-     * @var array
-     */
-    protected $logEntries;
-    /**
-     * @var string
-     */
-    protected $server;
+    private bool $logging = false;
+    private array $logEntries;
+    protected string $server;
     /**
      * @var int default 53
      */
-    protected $port;
+    protected int $port;
     /**
      * @var float = 60
      */
@@ -46,7 +40,7 @@ class dnsProtocol
     /**
      * @var bool = false;
      */
-    protected $udp;
+    protected bool $udp;
     /**
      * @var array
      */
@@ -56,19 +50,19 @@ class dnsProtocol
     private $socket;
 
     /** @var int */
-    private $currentState = 0;
+    private int $currentState = 0;
     /** @var float|null */
-    private $awaitingStarted;
+    private ?float $awaitingStarted;
 
     /** @var callable|null */
     private $cb;
 
     /** @var string|null */
-    private $requestHeader;
+    private ?string $requestHeader;
     /** @var int|null */
-    private $requestHeaderSize;
+    private ?int $requestHeaderSize;
     /** @var int|null */
-    private $requestHeaderSizeBin;
+    private ?int $requestHeaderSizeBin;
 
     /**
      * @param bool $logging
@@ -441,9 +435,7 @@ class dnsProtocol
 
     public function registrynameservers($tld): array
     {
-        $ns = new dnsNameserver();
-
-        return $ns->getNs($tld);
+        return (new dnsNameserver())->getNs($tld);
     }
 
     /** @noinspection TypeUnsafeComparisonInspection */
@@ -494,8 +486,7 @@ class dnsProtocol
         $iterationsCount = (int) $iterations;
         $toHash = '';
 
-        $qparts = explode('.', strtolower($qname).'.');
-        foreach ($qparts as $part) {
+        foreach (explode('.', strtolower($qname).'.') as $part) {
             $toHash .= chr(strlen($part)).$part;
         }
 
@@ -620,13 +611,13 @@ class dnsProtocol
         $response->setRecursionAvailable($flags[8] == '1');
         $response->setAuthenticated($flags[10] == '1');
         $response->setDnssecAware($flags[11] == '1');
-        $response->setAnswerCount($header['ancount']);
+        $response->setAnswerCount((int) $header['ancount']);
 
         $this->writeLog('Query returned '.$header['ancount'].' Answers');
 
         // Deal with the header question data
         if ($header['qdcount'] > 0) {
-            $response->setQueryCount($header['qdcount']);
+            $response->setQueryCount((int) $header['qdcount']);
             $this->writeLog('Found '.$header['qdcount'].' questions');
             $q = '';
             for ($a = 0; $a < $header['qdcount']; $a++) {
@@ -636,6 +627,7 @@ class dnsProtocol
                     $q .= $c;
                 }
                 $response->addQuery($q);
+                /** @noinspection UnusedFunctionResultInspection */
                 $response->ReadResponse($this->rawBuffer, 4);
             }
         }

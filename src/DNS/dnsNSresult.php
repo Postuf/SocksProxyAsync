@@ -5,7 +5,7 @@ namespace SocksProxyAsync\DNS;
 class dnsNSresult extends dnsResult
 {
     /** @var string */
-    private $nameserver;
+    private string $nameserver;
 
     /**
      * dnsNSresult constructor.

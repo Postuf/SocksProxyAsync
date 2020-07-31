@@ -12,7 +12,7 @@ namespace SocksProxyAsync\DNS;
 class dnsCNAMEresult extends dnsResult
 {
     /** @var string */
-    private $redirect;
+    private string $redirect;
 
     public function __construct(string $redirect)
     {

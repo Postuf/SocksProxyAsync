@@ -78,7 +78,6 @@ class dnsProtocol
         $this->timeout = self::DEFAULT_TIMEOUT;
         $this->udp = $udp;
         $this->types = new dnsTypes();
-        set_error_handler([$this, 'error_handler']);
         $this->writelog('dnsProtocol Class Initialised');
     }
 
@@ -91,26 +90,6 @@ class dnsProtocol
         if ($this->cb && $this->currentState !== self::STATE_READY) {
             $this->closeWithError(self::ERROR_CLOSING_ON_DESTRUCT);
         }
-    }
-
-    /**
-     * @param int         $errno
-     * @param string|null $errStr
-     * @param string|null $errFile
-     * @param int|null    $errLine
-     *
-     * @throws dnsException
-     *
-     * @return bool
-     */
-    public function error_handler($errno = 0, $errStr = null, $errFile = null, $errLine = null): bool
-    {
-        // If error is suppressed with @, don't throw an exception
-        if (error_reporting() === 0) {
-            return true; // return true to continue through the others error handlers
-        }
-
-        throw new dnsException('Found '.$errStr.' in line '.$errLine.' of '.$errFile, $errno, null);
     }
 
     public function clear(): void

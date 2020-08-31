@@ -36,8 +36,8 @@ class SocketAsync extends Socks5Socket implements Async
     /** @var bool */
     protected bool $isReady;
 
-    /** @var dnsProtocol */
-    protected dnsProtocol $resolver;
+    /** @var dnsProtocol|null */
+    protected ?dnsProtocol $resolver = null;
 
     /** @var bool */
     protected bool $resolveCallbackSet = false;
@@ -51,11 +51,11 @@ class SocketAsync extends Socks5Socket implements Async
     protected static array $dnsCache = [];
 
     /**
-     * @param Proxy  $proxy
-     * @param string $host
-     * @param int    $port
-     * @param int    $timeOutSeconds
-     * @param string $dnsHostAndPort
+     * @param Proxy       $proxy
+     * @param string      $host
+     * @param int         $port
+     * @param int         $timeOutSeconds
+     * @param string|null $dnsHostAndPort
      */
     public function __construct(
         Proxy $proxy,

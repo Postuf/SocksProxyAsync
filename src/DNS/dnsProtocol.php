@@ -28,7 +28,7 @@ class dnsProtocol
      */
     private bool $logging = false;
     private array $logEntries;
-    protected string $server;
+    protected ?string $server = null;
     /**
      * @var int default 53
      */
@@ -224,7 +224,7 @@ class dnsProtocol
         $this->currentState = self::STATE_OPEN;
         $this->requestHeader = $header;
         $this->requestHeaderSize = $headersize;
-        $this->requestHeaderSizeBin = $headersizebin;
+        $this->requestHeaderSizeBin = (int) $headersizebin;
     }
 
     /**

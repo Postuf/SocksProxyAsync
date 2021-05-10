@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/squizlabs/php_codesniffer/phpcs.xsd">
+
+    <arg name="basepath" value="."/>
+    <arg name="extensions" value="php"/>
+    <arg name="cache" value=".phpcs-cache"/>
+    <arg name="colors"/>
+    <arg name="parallel" value="80"/>
+    <arg value="nps"/>
+
+        <rule ref="Doctrine">
+            <exclude name="SlevomatCodingStandard.PHP.RequireExplicitAssertion.RequiredExplicitAssertion" />
+            <exclude name="SlevomatCodingStandard.Classes.SuperfluousExceptionNaming.SuperfluousSuffix" />
+        </rule>
+        <rule ref="PSR2.Methods.MethodDeclaration.Underscore">
+            <exclude-pattern>/tests/.*</exclude-pattern>
+        </rule>
+
+    <file>src/</file>
+    <file>tests/</file>
+
+    <ini name="memory_limit" value="256M" />
+</ruleset>

@@ -1,19 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 /** @noinspection PhpUnused */
 
 namespace SocksProxyAsync\DNS;
 
-class dnsResult
+/** @psalm-suppress PropertyNotSetInConstructor */
+class DnsResult
 {
-    private $type;
-    private $class;
-    private $data;
-    private $domain;
+    private int $type;
+    private int $class;
+    private string $data;
+    private string $domain;
     private string $record;
-    /**
-     * @var string|null
-     */
     private ?string $typeId;
     private int $ttl;
 
@@ -21,12 +21,12 @@ class dnsResult
     {
     }
 
-    public function getType()
+    public function getType(): int
     {
         return $this->type;
     }
 
-    public function setType($type): void
+    public function setType(int $type): void
     {
         $this->type = $type;
     }
@@ -41,12 +41,12 @@ class dnsResult
         return $this->typeId;
     }
 
-    public function getClass()
+    public function getClass(): int
     {
         return $this->class;
     }
 
-    public function setClass($class): void
+    public function setClass(int $class): void
     {
         $this->class = $class;
     }
@@ -71,12 +71,12 @@ class dnsResult
         $this->data = $data;
     }
 
-    public function getDomain()
+    public function getDomain(): string
     {
         return $this->domain;
     }
 
-    public function setDomain($domain): void
+    public function setDomain(string $domain): void
     {
         $this->domain = $domain;
     }

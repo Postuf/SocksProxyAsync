@@ -1,10 +1,8 @@
 <?php
 
-declare(strict_types=1);
-
 namespace SocksProxyAsync\DNS;
 
-final class DnsTXTResult extends DnsResult
+class dnsTXTresult extends dnsResult
 {
     private string $record;
 

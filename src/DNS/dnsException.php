@@ -6,6 +6,6 @@ namespace SocksProxyAsync\DNS;
 
 use Exception;
 
-final class DnsException extends Exception
+class dnsException extends Exception
 {
 }

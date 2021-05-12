@@ -1,13 +1,12 @@
 <?php
 
-declare(strict_types=1);
+/** @noinspection SpellCheckingInspection */
 
 namespace SocksProxyAsync\DNS;
 
 // Reference https://www.internic.net/domain/root.zone
-final class DnsNameserver
+class dnsNameserver
 {
-    /** @var array|string[][] */
     private array $ns = [
         'aaa'    => ['ns1.dns.nic.aaa.', 'ns2.dns.nic.aaa.', 'ns3.dns.nic.aaa.', 'ns4.dns.nic.aaa.', 'ns5.dns.nic.aaa.', 'ns6.dns.nic.aaa.'],
         'aarp'   => ['a5.nstld.com.', 'c5.nstld.com.', 'd5.nstld.com.', 'f5.nstld.com.', 'g5.nstld.com.', 'h5.nstld.com.', 'l5.nstld.com.'],
@@ -783,15 +782,8 @@ final class DnsNameserver
         'zw'     => ['ns1.telone.co.zw.', 'ns2.gip.net.', 'ns2.telone.co.zw.', 'ns3.telone.co.zw.'],
     ];
 
-    /**
-     * @return string[]
-     *
-     * @psalm-suppress MixedInferredReturnType
-     * @retrun list<string>
-     */
-    public function getNs(string $tld): array
+    public function getNs($tld): array
     {
-        /** @psalm-suppress MixedReturnStatement */
         return $this->ns[$tld];
     }
 }

@@ -7,22 +7,23 @@ namespace SocksProxyAsync;
 use Exception;
 use RuntimeException;
 
-use function microtime;
-
-final class AsyncStep
+class AsyncStep
 {
-    private int $step           = 0;
-    private int $stepTries      = 0;
+    private int $step = 0;
+    private int $stepTries = 0;
     private float $stepDuration = 0.0;
-    private float $stepStart    = 0.0;
+    private float $stepStart = 0.0;
     private string $stepName;
     private bool $neverRun = true;
-    private float $criticalTimeSeconds;
+    /**
+     * @var int
+     */
+    private $criticalTimeSeconds;
     private bool $finished = false;
 
     public function __construct(string $stepName, float $criticalTimeSeconds = Constants::ASYNC_STEP_MAX_SEC)
     {
-        $this->stepName            = $stepName;
+        $this->stepName = $stepName;
         $this->criticalTimeSeconds = $criticalTimeSeconds;
     }
 
@@ -39,12 +40,13 @@ final class AsyncStep
 
     public function finish(): void
     {
-        $this->step     = -1;
+        $this->step = -1;
         $this->finished = true;
         $this->resetStep();
     }
 
     /**
+     * @return bool
      * @noinspection PhpUnused
      */
     public function finished(): bool
@@ -54,8 +56,8 @@ final class AsyncStep
 
     private function resetStep(): void
     {
-        $this->stepStart    = microtime(true);
-        $this->stepTries    = 0;
+        $this->stepStart = microtime(true);
+        $this->stepTries = 0;
         $this->stepDuration = 0.0;
     }
 
@@ -76,7 +78,6 @@ final class AsyncStep
         if ($this->finished) {
             throw new RuntimeException(Constants::ERR_SOCKET_ASYNC_STEP_FINISHED);
         }
-
         if ($this->neverRun) {
             $this->neverRun = false;
             $this->resetStep();
@@ -85,13 +86,13 @@ final class AsyncStep
         $this->stepTries++;
         $this->stepDuration = microtime(true) - $this->stepStart;
 
-        if (microtime(true) - $this->stepStart > $this->criticalTimeSeconds) {
+        if ((microtime(true) - $this->stepStart) > $this->criticalTimeSeconds) {
             throw new RuntimeException(
-                Constants::ERR_SOCKET_ASYNC_STEP_TOO_LONG . ' ' .
-                'Step stuck: ' . $this->stepName .
-                ', stepNo: ' . $this->step .
-                ', tries: ' . $this->stepTries .
-                ', durations: ' . $this->stepTries . ': ' . $this->stepDuration
+                Constants::ERR_SOCKET_ASYNC_STEP_TOO_LONG.' '.
+                'Step stuck: '.$this->stepName.
+                ', stepNo: '.$this->step.
+                ', tries: '.$this->stepTries.
+                ', durations: '."{$this->stepTries}: {$this->stepDuration}"
             );
         }
     }

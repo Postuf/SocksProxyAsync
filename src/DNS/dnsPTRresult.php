@@ -1,10 +1,10 @@
 <?php
 
-declare(strict_types=1);
+/** @noinspection SpellCheckingInspection */
 
 namespace SocksProxyAsync\DNS;
 
-final class DnsPTRresult extends DnsResult
+class dnsPTRresult extends dnsResult
 {
     private string $data;
 

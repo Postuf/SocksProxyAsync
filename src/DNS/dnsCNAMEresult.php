@@ -1,5 +1,7 @@
 <?php
 
+/** @noinspection SpellCheckingInspection */
+/** @noinspection PhpUnused */
 declare(strict_types=1);
 
 namespace SocksProxyAsync\DNS;
@@ -7,8 +9,9 @@ namespace SocksProxyAsync\DNS;
 /**
  * @see https://tools.ietf.org/html/rfc1035
  */
-final class DnsCNAMEResult extends DnsResult
+class dnsCNAMEresult extends dnsResult
 {
+    /** @var string */
     private string $redirect;
 
     public function __construct(string $redirect)

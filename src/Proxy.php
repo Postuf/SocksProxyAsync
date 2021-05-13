@@ -4,28 +4,31 @@ declare(strict_types=1);
 
 namespace SocksProxyAsync;
 
-use function count;
-use function explode;
-use function strpos;
-use function trim;
-
-final class Proxy
+class Proxy
 {
-    public const TYPE_HTTP   = 1;
+    public const TYPE_HTTP = 1;
     public const TYPE_SOCKS5 = 3;
 
-    private string $server;
-    private string $port;
+    /** @var string */
+    private $server;
+    /** @var string */
+    private $port;
+    /** @var int */
     private int $type;
 
+    /** @var string|null */
     private ?string $password = null;
-    private ?string $login    = null;
+    /** @var string|null */
+    private ?string $login = null;
 
     /**
      * Proxy formats:
      *      1) host:port
      *      2) host:port|login:password
      * are supported.
+     *
+     * @param string $serverAndPort
+     * @param int    $type
      *
      * @throws SocksException
      */
@@ -36,34 +39,35 @@ final class Proxy
             if (count($parts) !== 2) {
                 throw new SocksException(SocksException::PROXY_BAD_FORMAT);
             }
-
             $serverAndPort = $parts[0];
-            $auth          = explode(':', $parts[1]);
+            $auth = explode(':', $parts[1]);
             if (count($auth) !== 2) {
                 throw new SocksException(SocksException::PROXY_BAD_FORMAT);
             }
-
             $this->setLoginPassword($auth[0], $auth[1]);
         }
-
         $proxyPath = explode(':', $serverAndPort);
         if (count($proxyPath) !== 2) {
             throw new SocksException(SocksException::PROXY_BAD_FORMAT);
         }
-
         $this->server = trim($proxyPath[0]);
-        $this->port   = trim($proxyPath[1]);
+        $this->port = trim($proxyPath[1]);
 
         if ($type !== self::TYPE_HTTP && $type !== self::TYPE_SOCKS5) {
             throw new SocksException(SocksException::PROXY_BAD_FORMAT);
         }
-
         $this->type = $type;
     }
 
+    /**
+     * @param string|null $login
+     * @param string|null $password
+     *
+     * @return self
+     */
     public function setLoginPassword(?string $login, ?string $password): self
     {
-        $this->login    = $login;
+        $this->login = $login;
         $this->password = $password;
 
         return $this;
@@ -106,8 +110,8 @@ final class Proxy
         return $this->password;
     }
 
-    public function __toString(): string
+    public function __toString()
     {
-        return $this->server . ':' . $this->port;
+        return $this->server.':'.$this->port;
     }
 }

@@ -9,7 +9,7 @@ use function explode;
 use function strpos;
 use function trim;
 
-final class Proxy
+class Proxy
 {
     public const TYPE_HTTP   = 1;
     public const TYPE_SOCKS5 = 3;

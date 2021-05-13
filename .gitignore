@@ -7,3 +7,6 @@ nohup.out
 pid1.txt
 pid2.txt
 tests/coverage.xml
+local-php-security-checker
+.phpcs-cache
+phpcs.xml

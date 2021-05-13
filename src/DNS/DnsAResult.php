@@ -1,6 +1,5 @@
 <?php
 
-/** @noinspection SpellCheckingInspection */
 declare(strict_types=1);
 
 namespace SocksProxyAsync\DNS;
@@ -8,9 +7,9 @@ namespace SocksProxyAsync\DNS;
 /**
  * @see https://tools.ietf.org/html/rfc1035
  */
-class dnsAresult extends dnsResult
+class DnsAResult extends DnsResult
 {
-    /** @var string */
+    /** @psalm-suppress PropertyNotSetInConstructor */
     private string $ipv4;
 
     public function __construct(string $ip)

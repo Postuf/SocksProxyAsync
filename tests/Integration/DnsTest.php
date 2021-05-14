@@ -2,42 +2,49 @@
 
 declare(strict_types=1);
 
-namespace Integration;
+namespace Tests\Integration;
 
 use PHPUnit\Framework\TestCase;
-use SocksProxyAsync\DNS\dnsAresult;
-use SocksProxyAsync\DNS\dnsMXresult;
-use SocksProxyAsync\DNS\dnsProtocol;
-use SocksProxyAsync\DNS\dnsResponse;
+use SocksProxyAsync\DNS\DnsAResult;
+use SocksProxyAsync\DNS\DnsMXResult;
+use SocksProxyAsync\DNS\DnsProtocol;
+use SocksProxyAsync\DNS\DnsResponse;
 
-class DnsTest extends TestCase
+use function strtolower;
+
+final class DnsTest extends TestCase
 {
-    public function test_resolve(): void
+    public function testResolve(): void
     {
-        $dns = new dnsProtocol();
+        $dns = new DnsProtocol();
         $dns->setServer('8.8.8.8');
         $question = 'google.com';
         /** @noinspection PhpUnhandledExceptionInspection */
-        $result = $dns->Query($question, 'A');
-        /* @var $result dnsResponse */
+        $result = $dns->query($question, 'A');
+        /** @var DnsResponse $result */
         $found = false;
         foreach ($result->getResourceResults() as $resource) {
-            if ($resource instanceof dnsAresult) {
-                $found = true;
-                self::assertEquals($question, strtolower($resource->getDomain()));
+            if (! ($resource instanceof DnsAResult)) {
+                continue;
             }
+
+            $found = true;
+            self::assertEquals($question, strtolower($resource->getDomain()));
         }
+
         self::assertEquals(true, $found);
 
         /** @noinspection PhpUnhandledExceptionInspection */
-        $result = $dns->Query($question, 'MX');
-        /* @var $result dnsResponse */
+        $result = $dns->query($question, 'MX');
+        /** @var DnsResponse $result */
         $found = false;
         foreach ($result->getResourceResults() as $resource) {
-            if ($resource instanceof dnsMXresult) {
-                $found = true;
-                self::assertEquals($question, strtolower($resource->getDomain()));
+            if (! ($resource instanceof DnsMXResult)) {
+                continue;
             }
+
+            $found = true;
+            self::assertEquals($question, strtolower($resource->getDomain()));
         }
 
         self::assertEquals(true, $found);

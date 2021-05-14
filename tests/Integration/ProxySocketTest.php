@@ -2,38 +2,40 @@
 
 declare(strict_types=1);
 
-namespace Integration;
+namespace Tests\Integration;
 
 use PHPUnit\Framework\TestCase;
 use SocksProxyAsync\Proxy;
 use SocksProxyAsync\Socks5Socket;
 use SocksProxyAsync\SocksException;
 
-class ProxySocketTest extends TestCase
+use function sprintf;
+use function strlen;
+
+final class ProxySocketTest extends TestCase
 {
     private const PROXY = '127.0.0.1:1080';
-    private const HOST = '127.0.0.1';
-    private const PORT = '8080';
+    private const HOST  = '127.0.0.1';
+    private const PORT  = '8080';
 
     private Socks5Socket $socket;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $proxy = new Proxy(static::PROXY);
+        $proxy        = new Proxy(self::PROXY);
         $this->socket = new Socks5Socket($proxy, 10);
     }
 
     /**
      * @throws SocksException
      */
-    public function test_socket_ip(): void
+    public function testSocketIp(): void
     {
-        /** @noinspection UnusedFunctionResultInspection */
-        $this->socket->createConnected(self::HOST, self::PORT);
+        $this->socket->createConnected(self::HOST, (int) self::PORT);
         // http req body
-        $br = "\r\n";
-        $data = "GET /test{$br}Host: 127.0.0.1:8080{$br}Accept: identity{$br}{$br}";
+        $br   = "\r\n";
+        $data = sprintf('GET /test%sHost: 127.0.0.1:8080%sAccept: identity%s%s', $br, $br, $br, $br);
 
         $writtenBytes = $this->socket->write($data);
         self::assertEquals($writtenBytes, strlen($data));

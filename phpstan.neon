@@ -1,0 +1,6 @@
+parameters:
+  inferPrivatePropertyTypeFromConstructor: true
+  checkMissingIterableValueType: false
+  treatPhpDocTypesAsCertain: false
+  excludes_analyse:
+  	- tests/*

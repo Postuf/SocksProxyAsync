@@ -8,7 +8,7 @@ Asynchronous SOCKS5 client library
 
 ## Requirements
 
-* PHP 7.3+
+* PHP 7.4+
 * Composer
   * ext-sockets
 
@@ -43,3 +43,23 @@ Tests require working proxy and http server to be up and running, use `node/prox
 By default, http server runs on port 8080, proxy occupies port 1080, tests use these ports.
 
 DNS-related tests require dns server (`node/named.js`) to be up and running.
+
+### Make commands
+
+- make all - run all checks
+
+- make test - run tests
+  
+- make cs - run codesniffer checks
+  
+- make psalm - run psalm checks
+  
+- make stan - run stan checks
+  
+- make cs - run stan and psalm checks
+
+- make get-security - get security checker
+
+- make security - run security checker
+
+

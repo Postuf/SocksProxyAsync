@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-use SocksProxyAsync\DNS\dnsException;
-use SocksProxyAsync\DNS\dnsProtocol;
+use SocksProxyAsync\DNS\DnsException;
+use SocksProxyAsync\DNS\DnsProtocol;
 
 require_once __DIR__.'/../vendor/autoload.php';
 
-$proto = new dnsProtocol();
+$proto = new DnsProtocol();
 $proto->setServer('8.8.8.8');
 
 try {
-    $response = $proto->Query('google.com');
+    $response = $proto->query('google.com');
     print_r($response);
-} catch (dnsException $e) {
+} catch (DnsException $e) {
     print_r($e);
 }

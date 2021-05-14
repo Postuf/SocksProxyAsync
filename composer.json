@@ -23,8 +23,7 @@
     },
     "require": {
         "php": "^7.4",
-        "ext-sockets": "*",
-        "thecodingmachine/safe": "^1.3"
+        "ext-sockets": "*"
     },
     "scripts": {
         "test": "vendor/bin/phpunit --configuration tests/phpunit.config.xml",

@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace unit;
+namespace Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
 use SocksProxyAsync\Proxy;
 use SocksProxyAsync\SocksException;
 
-class ProxyTest extends TestCase
+final class ProxyTest extends TestCase
 {
-    public function test_it_creates(): void
+    public function testItCreates(): void
     {
         $proxy = new Proxy('1.2.3.4:80');
         self::assertEquals(80, $proxy->getPort());
@@ -19,14 +19,14 @@ class ProxyTest extends TestCase
         self::assertEquals(null, $proxy->getPassword());
     }
 
-    public function test_it_sets_server(): void
+    public function testItSetsServer(): void
     {
         $proxy = new Proxy('1.2.3.4:80');
         $proxy->setServer('1.2.3.5');
         self::assertEquals('1.2.3.5', $proxy->getServer());
     }
 
-    public function test_it_creates_with_login_pw(): void
+    public function testItCreatesWithLoginPw(): void
     {
         $proxy = new Proxy('1.2.3.4:80|a:b');
         self::assertEquals(80, $proxy->getPort());
@@ -39,19 +39,19 @@ class ProxyTest extends TestCase
     /**
      * @throws SocksException
      */
-    public function test_it_throws_incorrect_type(): void
+    public function testItThrowsIncorrectType(): void
     {
         $this->expectException(SocksException::class);
         new Proxy('1.2.3.4:80', 10);
     }
 
-    public function test_it_throws_incorrect_pipe(): void
+    public function testItThrowsIncorrectPipe(): void
     {
         $this->expectException(SocksException::class);
         new Proxy('a|b|c');
     }
 
-    public function test_it_throws_incorrect_format(): void
+    public function testItThrowsIncorrectFormat(): void
     {
         $this->expectException(SocksException::class);
         new Proxy('a:b:c');

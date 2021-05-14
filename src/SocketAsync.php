@@ -6,7 +6,6 @@ declare(strict_types=1);
 
 namespace SocksProxyAsync;
 
-use Safe\Exceptions\SocketsException;
 use SocksProxyAsync\DNS\DnsAResult;
 use SocksProxyAsync\DNS\DnsException;
 use SocksProxyAsync\DNS\DnsProtocol;
@@ -15,13 +14,13 @@ use Throwable;
 
 use function explode;
 use function is_file;
-use function Safe\file_get_contents;
-use function Safe\preg_match;
-use function Safe\socket_connect;
-use function Safe\socket_create;
-use function Safe\socket_set_nonblock;
-use function Safe\socket_set_option;
-use function Safe\substr;
+use function file_get_contents;
+use function preg_match;
+use function socket_connect;
+use function socket_create;
+use function socket_set_nonblock;
+use function socket_set_option;
+use function substr;
 use function socket_clear_error;
 use function socket_last_error;
 use function str_replace;
@@ -168,7 +167,7 @@ class SocketAsync extends Socks5Socket implements Async
                 } elseif ($this->proxy->getServer() === 'localhost') {
                     $this->proxy->setServer('127.0.0.1');
                 } elseif ($this->hasDnsCache($this->proxy->getServer())) {
-                    $this->proxy->setServer(self::$dnsCache[$this->proxy->getServer()][0]);
+                    $this->proxy->setServer((string)self::$dnsCache[$this->proxy->getServer()][0]);
                     $this->nameReady = true;
                     $this->step->setStep(self::STATE_CONNECT);
                 } else {
@@ -195,8 +194,8 @@ class SocketAsync extends Socks5Socket implements Async
 
                 break;
             case self::STATE_GREETING:
-                try {
-                    $socksGreetingConfig = $this->readSocksGreeting();
+                $socksGreetingConfig = $this->readSocksGreeting();
+                if ($socksGreetingConfig) {
                     $this->checkServerGreetedClient($socksGreetingConfig);
                     if ($this->checkGreetingWithAuth($socksGreetingConfig)) {
                         $this->writeSocksAuth();
@@ -204,10 +203,7 @@ class SocketAsync extends Socks5Socket implements Async
                     } else {
                         $this->step->setStep(self::STATE_SOCKET_CONNECT);
                     }
-                } catch (SocketsException $e) {
-                    // @ignoreException
                 }
-
                 break;
             case self::STATE_AUTH:
                 if ($this->readSocksAuthStatus()) {
@@ -324,19 +320,18 @@ class SocketAsync extends Socks5Socket implements Async
      */
     protected function connectSocket(): bool
     {
-        if ($this->socksSocket !== null) {
-            try {
-                @socket_connect($this->socksSocket, $this->proxy->getServer(), (int) $this->proxy->getPort());
-            } catch (SocketsException $e) {
-                $lastError = socket_last_error($this->socksSocket);
-                if ($lastError === SOCKET_EINPROGRESS || $lastError === SOCKET_EALREADY) {
-                    return false;
-                }
-
-                if ($lastError === SOCKET_EISCONN) {
-                    return true;
-                }
+        if ($this->socksSocket !== false) {
+            @socket_connect($this->socksSocket, $this->proxy->getServer(), (int) $this->proxy->getPort());
+            $lastError = socket_last_error($this->socksSocket);
+            if ($lastError === SOCKET_EINPROGRESS || $lastError === SOCKET_EALREADY) {
+                return false;
             }
+
+            if ($lastError === SOCKET_EISCONN) {
+                return true;
+            }
+
+            throw new SocksException(SocksException::UNREACHABLE_PROXY, 'on connect: '.$lastError);
         }
 
         return false;

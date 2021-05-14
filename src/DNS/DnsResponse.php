@@ -7,9 +7,9 @@ namespace SocksProxyAsync\DNS;
 use function base64_encode;
 use function implode;
 use function ord;
-use function Safe\sprintf;
-use function Safe\substr;
-use function Safe\unpack;
+use function sprintf;
+use function substr;
+use function unpack;
 use function strlen;
 use function strtoupper;
 
@@ -204,8 +204,6 @@ final class DnsResponse
     }
 
     /**
-     * @throws DnsException
-     *
      * @noinspection TypeUnsafeComparisonInspection
      */
     public function readRecord(string $buffer, string $resulttype = ''): void

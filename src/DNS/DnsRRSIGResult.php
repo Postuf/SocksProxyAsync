@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace SocksProxyAsync\DNS;
 
-use function Safe\date;
+use function date;
 
 /** @psalm-suppress PropertyNotSetInConstructor */
 class DnsRRSIGResult extends DnsResult

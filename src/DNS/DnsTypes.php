@@ -6,7 +6,7 @@ declare(strict_types=1);
 
 namespace SocksProxyAsync\DNS;
 
-use function Safe\sprintf;
+use function sprintf;
 
 /**
  * Reference http://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml.

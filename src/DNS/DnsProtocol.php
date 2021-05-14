@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace SocksProxyAsync\DNS;
 
-use Safe\Exceptions\FilesystemException;
-use Safe\Exceptions\NetworkException;
+
 use Throwable;
 
 use function base_convert;
@@ -17,18 +16,18 @@ use function hexdec;
 use function microtime;
 use function ord;
 use function random_int;
-use function Safe\date;
-use function Safe\fclose;
-use function Safe\fread;
-use function Safe\fsockopen;
-use function Safe\fwrite;
-use function Safe\pack;
-use function Safe\preg_match;
-use function Safe\sprintf;
-use function Safe\stream_set_blocking;
-use function Safe\stream_socket_shutdown;
-use function Safe\substr;
-use function Safe\unpack;
+use function date;
+use function fclose;
+use function fread;
+use function fsockopen;
+use function fwrite;
+use function pack;
+use function preg_match;
+use function sprintf;
+use function stream_set_blocking;
+use function stream_socket_shutdown;
+use function substr;
+use function unpack;
 use function sha1;
 use function str_pad;
 use function str_repeat;
@@ -78,7 +77,7 @@ final class DnsProtocol
 
     private ?string $requestHeader;
     private ?int $requestHeaderSize;
-    private ?string $requestHeaderSizeBin;
+    private ?int $requestHeaderSizeBin;
 
     public function __construct(bool $logging = false, int $port = self::DEFAULT_PORT, bool $udp = false)
     {
@@ -111,37 +110,24 @@ final class DnsProtocol
         $this->socket = null;
     }
 
-    /**
-     * @throws DnsException
-     */
     public function poll(): void
     {
         switch ($this->currentState) {
             // we have a socket open
             case self::STATE_OPEN:
-                if ($this->udp === true) {
-                    try {
-                        /** @psalm-suppress PossiblyNullArgument */
-                        fwrite($this->socket, $this->requestHeader, $this->requestHeaderSize);
-                    } catch (FilesystemException $e) {
+                if ($this->udp) {
+                    if (!fwrite($this->socket, $this->requestHeader, $this->requestHeaderSize)) {
                         $this->closeWithError('Failed to write question to socket');
 
                         return;
                     }
                 } else {
-                    try {
-                        /** @psalm-suppress PossiblyNullArgument */
-                        fwrite($this->socket, $this->requestHeaderSizeBin);
-                    } catch (FilesystemException $e) {
+                    if (!fwrite($this->socket, $this->requestHeaderSizeBin)) { // write the socket
                         $this->closeWithError('Failed to write question length to TCP socket');
 
                         return;
                     }
-
-                    try {
-                        /** @psalm-suppress PossiblyNullArgument */
-                        fwrite($this->socket, $this->requestHeader, $this->requestHeaderSize);
-                    } catch (FilesystemException $e) {
+                    if (!fwrite($this->socket, $this->requestHeader, $this->requestHeaderSize)) {
                         $this->closeWithError('Failed to write question to TCP socket');
 
                         return;
@@ -225,6 +211,8 @@ final class DnsProtocol
     }
 
     /**
+     * @param string   $question
+     * @param string   $type
      * @param callable $cb function(?dnsResponse $response)
      *
      * @throws DnsException
@@ -232,131 +220,114 @@ final class DnsProtocol
     public function queryAsync(string $question, string $type, callable $cb): void
     {
         $typeid = $this->types->getByName($type);
-
-        $host = $this->udp === true ? 'udp://' . (string) $this->server : (string) $this->server;
-
-        try {
-            fsockopen($host, $this->port, $errno, $errstr, $this->timeout);
-            /** @phpstan-ignore-next-line */
-        } catch (NetworkException $e) {
-            throw new DnsException('Failed to open socket to ' . $host);
+        if ($typeid === false) {
+            throw new DnsException('Invalid Query Type '.$type);
         }
 
-        /** @psalm-suppress PossiblyNullArgument */
+        if ($this->udp) {
+            $host = 'udp://'.$this->server;
+        } else {
+            $host = $this->server;
+        }
+        if (!$this->socket = @fsockopen($host, $this->port, $errno, $errstr, $this->timeout)) {
+            throw new DnsException('Failed to open socket to '.$host);
+        }
+
         stream_set_blocking($this->socket, false);
+        [$header, $headersize, $headersizebin] = $this->prepareRequestHeaders($question, $type, $typeid);
 
-        /**
-         * @var string $header
-         * @var int $headerSize
-         * @var string $headerSizeBin
-         */
-        [$header, $headerSize, $headerSizeBin] = $this->prepareRequestHeaders($question, $type, $typeid);
+        if (($this->udp) && ($headersize >= 512)) {
+            @stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
+            @fclose($this->socket);
+            $this->socket = null;
 
-        if ($this->udp === true && ($headerSize >= 512)) {
-            if ($this->socket !== null) {
-                @stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
-                @fclose($this->socket);
-                $this->socket = null;
-            }
-
-            throw new DnsException('Question too big for UDP (' . $headerSize . ' bytes)');
+            throw new DnsException('Question too big for UDP ('.$headersize.' bytes)');
         }
 
-        $this->cb                   = $cb;
-        $this->currentState         = self::STATE_OPEN;
-        $this->requestHeader        = $header;
-        $this->requestHeaderSize    = $headerSize;
-        $this->requestHeaderSizeBin = $headerSizeBin;
+        $this->cb = $cb;
+        $this->currentState = self::STATE_OPEN;
+        $this->requestHeader = $header;
+        $this->requestHeaderSize = $headersize;
+        $this->requestHeaderSizeBin = (int) $headersizebin;
     }
 
     /**
+     * @param string $question
+     * @param string $type
+     *
+     * @return DnsResponse
      * @throws DnsException
      */
     public function query(string $question, string $type = 'A'): DnsResponse
     {
         $typeid = $this->types->getByName($type);
-
-        $host = $this->udp === true ? 'udp://' . (string) $this->server : (string) $this->server;
-
-        try {
-            $socket = fsockopen($host, $this->port, $errno, $errstr, $this->timeout);
-            /** @phpstan-ignore-next-line */
-        } catch (NetworkException $e) {
-            throw new DnsException('Failed to open socket to ' . $host);
+        if ($typeid === false) {
+            throw new DnsException('Invalid Query Type '.$type);
         }
 
-        /**
-         * @var string $header
-         * @var int $headerSize
-         * @var string $headerSizeBin
-         */
+        if ($this->udp) {
+            $host = 'udp://'.$this->server;
+        } else {
+            $host = $this->server;
+        }
+        if (!$socket = @fsockopen($host, $this->port, $errno, $errstr, $this->timeout)) {
+            throw new DnsException('Failed to open socket to '.$host);
+        }
+
         [$header, $headerSize, $headerSizeBin] = $this->prepareRequestHeaders($question, $type, $typeid);
 
-        if ($this->udp && ($headerSize >= 512)) {
+        if (($this->udp) && ($headerSize >= 512)) {
             stream_socket_shutdown($socket, STREAM_SHUT_RDWR);
             fclose($socket);
 
-            throw new DnsException('Question too big for UDP (' . $headerSize . ' bytes)');
+            throw new DnsException('Question too big for UDP ('.$headerSize.' bytes)');
         }
 
         if ($this->udp) { // UDP method
-            if (! fwrite($socket, $header, $headerSize)) {
+            if (!fwrite($socket, $header, $headerSize)) {
                 stream_socket_shutdown($socket, STREAM_SHUT_RDWR);
                 fclose($socket);
 
                 throw new DnsException('Failed to write question to socket');
             }
-
-            try {
-                $this->rawBuffer = fread($socket, 4096);
-                /** @phpstan-ignore-next-line */
-            } catch (FilesystemException $e) {
+            if (!$this->rawBuffer = fread($socket, 4096)) { // read until the end with UDP
                 stream_socket_shutdown($socket, STREAM_SHUT_RDWR);
                 fclose($socket);
 
                 throw new DnsException('Failed to write read data buffer');
             }
         } else { // TCP method
-            if (! fwrite($socket, $headerSizeBin)) { // write the socket
+            if (!fwrite($socket, $headerSizeBin)) { // write the socket
                 stream_socket_shutdown($socket, STREAM_SHUT_RDWR);
                 fclose($socket);
 
                 throw new DnsException('Failed to write question length to TCP socket');
             }
-
-            if (! fwrite($socket, $header, $headerSize)) {
+            if (!fwrite($socket, $header, $headerSize)) {
                 stream_socket_shutdown($socket, STREAM_SHUT_RDWR);
                 fclose($socket);
 
                 throw new DnsException('Failed to write question to TCP socket');
             }
-
-            $returnSize = fread($socket, 2);
-            if ($returnSize === '') {
+            if (!$returnsize = fread($socket, 2)) {
                 stream_socket_shutdown($socket, STREAM_SHUT_RDWR);
                 fclose($socket);
             }
-
-            $tmplen   = unpack('nlength', $returnSize);
-            $datasize = (string) $tmplen['length'];
-            $this->writeLog('TCP Stream Length Limit ' . $datasize);
-
-            try {
-                $this->rawBuffer = fread($socket, (int) $datasize);
-                /** @phpstan-ignore-next-line */
-            } catch (FilesystemException $e) {
+            $tmplen = unpack('nlength', $returnsize);
+            $datasize = $tmplen['length'];
+            $this->writeLog('TCP Stream Length Limit '.$datasize);
+            if (!$this->rawBuffer = fread($socket, $datasize)) {
                 stream_socket_shutdown($socket, STREAM_SHUT_RDWR);
                 fclose($socket);
 
                 throw new DnsException('Failed to read data buffer');
             }
         }
-
         stream_socket_shutdown($socket, STREAM_SHUT_RDWR);
         fclose($socket);
 
         $buffersize = strlen($this->rawBuffer);
-        $this->writelog('Read Buffer Size ' . $buffersize);
+        $this->writelog('Read Buffer Size '.$buffersize);
         if ($buffersize < 12) {
             throw new DnsException('DNS query return buffer too small');
         }
@@ -374,6 +345,11 @@ final class DnsProtocol
         return (string) $this->server;
     }
 
+    /**
+     * @param float|int $timeout
+     *
+     * @throws DnsException
+     */
     public function setTimeout(float $timeout = self::DEFAULT_TIMEOUT): void
     {
         if ($timeout < 0) {
@@ -423,6 +399,10 @@ final class DnsProtocol
     /**
      * @see http://www.iana.org/protocols
      * @see http://www.iana.org/assignments/dns-sec-alg-numbers/dns-sec-alg-numbers.xml
+     *
+     * @param int $code
+     *
+     * @return string|null
      */
     public function algorithm(int $code): ?string
     {
@@ -470,6 +450,8 @@ final class DnsProtocol
     }
 
     /**
+     * @param string $tld
+     *
      * @return string[]
      */
     public function getRegistryNameServers(string $tld): array
@@ -519,9 +501,9 @@ final class DnsProtocol
             return '';
         }
 
-        $input        = str_split($input);
+        $inputAsArray = str_split($input);
         $binaryString = '';
-        foreach ($input as $iValue) {
+        foreach ($inputAsArray as $iValue) {
             $binaryString .= str_pad(base_convert((string) ord($iValue), 10, 2), 8, '0', STR_PAD_LEFT);
         }
 
@@ -603,6 +585,10 @@ final class DnsProtocol
     }
 
     /**
+     * @param string $question
+     * @param string $type
+     * @param int    $typeId
+     *
      * @return mixed[]
      */
     protected function prepareRequestHeaders(string $question, string $type, int $typeId): array
@@ -675,17 +661,17 @@ final class DnsProtocol
         $response->setDnssecAware($flags[11] === '1');
         $response->setAnswerCount((int) $header['ancount']);
 
-        $this->writeLog('Query returned ' . (string) $header['ancount'] . ' Answers');
+        $this->writeLog('Query returned ' . $header['ancount'] . ' Answers');
 
         // Deal with the header question data
         if ($header['qdcount'] > 0) {
             $response->setQueryCount((int) $header['qdcount']);
-            $this->writeLog('Found ' . (string) $header['qdcount'] . ' questions');
+            $this->writeLog('Found ' . $header['qdcount'] . ' questions');
             $q = '';
             for ($a = 0; $a < $header['qdcount']; $a++) {
                 $c = 1;
                 while ($c !== 0) {
-                    $c  = hexdec(bin2hex($response->readResponse($this->rawBuffer, 1)));
+                    $c  = hexdec(bin2hex($response->readResponse($this->rawBuffer)));
                     $q .= $c;
                 }
 
@@ -695,20 +681,20 @@ final class DnsProtocol
             }
         }
 
-        $this->writeLog('Found ' . (string) $header['ancount'] . ' answer records');
+        $this->writeLog('Found ' . $header['ancount'] . ' answer records');
         $response->setResourceResultCount((int) $header['ancount']);
         for ($a = 0; $a < $header['ancount']; $a++) {
             $response->readRecord($this->rawBuffer, DnsResponse::RESULTTYPE_RESOURCE);
         }
 
-        $this->writeLog('Found ' . (string) $header['nscount'] . ' authorative records');
+        $this->writeLog('Found ' . $header['nscount'] . ' authorative records');
         $response->setNameserverResultCount((int) $header['nscount']);
         for ($a = 0; $a < $header['nscount']; $a++) {
             $response->readRecord($this->rawBuffer, DnsResponse::RESULTTYPE_NAMESERVER);
         }
 
         $response->setAdditionalResultCount((int) $header['arcount']);
-        $this->writeLog('Found ' . (string) $header['arcount'] . ' additional records');
+        $this->writeLog('Found ' . $header['arcount'] . ' additional records');
         for ($a = 0; $a < $header['arcount']; $a++) {
             $response->readRecord($this->rawBuffer, DnsResponse::RESULTTYPE_ADDITIONAL);
         }

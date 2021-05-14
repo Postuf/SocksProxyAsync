@@ -4,20 +4,18 @@ declare(strict_types=1);
 
 namespace SocksProxyAsync;
 
-use Safe\Exceptions\SocketsException;
-
 use function chr;
 use function ip2long;
 use function ord;
-use function Safe\pack;
-use function Safe\preg_match;
-use function Safe\socket_connect;
-use function Safe\socket_create;
-use function Safe\socket_read;
-use function Safe\socket_set_option;
-use function Safe\socket_shutdown;
-use function Safe\socket_write;
-use function Safe\unpack;
+use function pack;
+use function preg_match;
+use function socket_connect;
+use function socket_create;
+use function socket_read;
+use function socket_set_option;
+use function socket_shutdown;
+use function socket_write;
+use function unpack;
 use function socket_close;
 use function strlen;
 use function trim;
@@ -126,11 +124,9 @@ class Socks5Socket
      */
     protected function connectSocket(): bool
     {
-        if ($this->socksSocket !== null) {
-            try {
-                @socket_connect($this->socksSocket, $this->proxy->getServer(), (int) $this->proxy->getPort());
-                /** @phpstan-ignore-next-line */
-            } catch (SocketsException $e) {
+        if ($this->socksSocket !== false) {
+            $result = @socket_connect($this->socksSocket, $this->proxy->getServer(), $this->proxy->getPort());
+            if (!$result) {
                 throw new SocksException(SocksException::UNREACHABLE_PROXY, 'on connect: ');
             }
         }
@@ -144,9 +140,6 @@ class Socks5Socket
         $this->write($helloMsg);
     }
 
-    /**
-     * @throws SocketsException
-     */
     protected function readSocksGreeting(): string
     {
         return $this->read(2);
@@ -196,9 +189,9 @@ class Socks5Socket
      */
     protected function readSocksAuthStatus(): bool
     {
-        try {
-            $socksAuthStatus = $this->read(2);
-        } catch (SocketsException $e) {
+        $socksAuthStatus = $this->read(2);
+
+        if (!$socksAuthStatus) {
             return false;
         }
 
@@ -240,9 +233,8 @@ class Socks5Socket
     protected function readSocksConnectStatus(): bool
     {
         // server connection response
-        try {
-            $connectionStatus = $this->read(1024);
-        } catch (SocketsException $e) {
+        $connectionStatus = $this->read(1024);
+        if (!$connectionStatus) {
             return false;
         }
 
@@ -271,7 +263,6 @@ class Socks5Socket
     /**
      * @param string $data binary to write
      *
-     * @throws SocketsException
      */
     public function write(string $data): int
     {
@@ -280,7 +271,9 @@ class Socks5Socket
     }
 
     /**
-     * @throws SocketsException
+     * @param int $bytesCount
+     *
+     * @return string
      */
     public function read(int $bytesCount): string
     {

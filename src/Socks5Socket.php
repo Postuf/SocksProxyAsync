@@ -278,7 +278,7 @@ class Socks5Socket
     public function read(int $bytesCount): string
     {
         /** @psalm-suppress PossiblyNullArgument */
-        return socket_read($this->socksSocket, $bytesCount);
+        return @socket_read($this->socksSocket, $bytesCount);
     }
 
     public function getHost(): string

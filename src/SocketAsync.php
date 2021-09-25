@@ -55,7 +55,7 @@ class SocketAsync extends Socks5Socket implements Async
     public const DEFAULT_DNS_SERVER   = '8.8.8.8';
     private const ETC_RESOLV_CONF     = '/etc/resolv.conf';
     private const ADDRESS_TYPE_A      = 'A';
-    private const DNS_TTL_SEC         = 600;
+    private const DNS_TTL_SEC         = 3600;
 
     protected AsyncStep $step;
 

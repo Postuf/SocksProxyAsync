@@ -564,7 +564,7 @@ final class DnsProtocol
 
     protected function closeWithError(string $error): void
     {
-        if ($this->socket !== null) {
+        if (is_resource($this->socket)) {
             @stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
             @fclose($this->socket);
         }

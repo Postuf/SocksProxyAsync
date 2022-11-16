@@ -4,7 +4,7 @@ Asynchronous SOCKS5 client library
 
 [![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/Postuf/SocksProxyAsync)
 
-[![Build Status](https://travis-ci.org/Postuf/SocksProxyAsync.svg?branch=master)](https://travis-ci.org/Postuf/SocksProxyAsync) [![codecov](https://codecov.io/gh/Postuf/SocksProxyAsync/branch/master/graph/badge.svg)](https://codecov.io/gh/Postuf/SocksProxyAsync)
+[![codecov](https://codecov.io/gh/Postuf/SocksProxyAsync/branch/master/graph/badge.svg)](https://codecov.io/gh/Postuf/SocksProxyAsync)
 
 ## Requirements
 
